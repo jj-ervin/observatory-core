@@ -42,7 +42,7 @@ export function createSecureFeedTransport({allowedHosts,approvedAddresses,resolv
   if(signal?.aborted)throw new Error("retrieval aborted");
   const pinned=addresses[0];
   return new Promise((resolve,reject)=>{
-   const req=https.get(u,{signal,lookup:(_host,_options,callback)=>callback(null,pinned.address,pinned.family),headers:{accept:"application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.8"}},res=>{
+   const req=https.get(u,{signal,lookup:(_host,options,callback)=>options?.all?callback(null,[{address:pinned.address,family:pinned.family}]):callback(null,pinned.address,pinned.family),headers:{accept:"application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.8"}},res=>{
     const status=res.statusCode??0;
     if(status!==200){res.destroy();reject(new Error("feed HTTP status "+status));return;}
     // Adapt Node stream to WHATWG stream; retrieveFeed enforces byte limits.

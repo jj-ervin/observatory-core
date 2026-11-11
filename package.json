@@ -1,8 +1,9 @@
 {
   "name": "@governancecommons/observatory-core",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
+  "files": ["src"],
   "scripts": {
     "test": "node --test",
     "validate:export": "node scripts/validate-export.mjs",
