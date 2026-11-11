@@ -32,7 +32,9 @@ function validProvider(p) {
   if (!p || !/^[a-z][a-z0-9-]{0,39}$/.test(p.id) || !['rss','openalex','briefing','brave'].includes(p.type) || typeof p.enabled!=='boolean') throw new TypeError('Invalid provider');
   const feeds=(p.feeds||[]).map(urlOf), queries=(p.queries||[]).map(x=>clean(x,200)).filter(Boolean);
   if (feeds.length>30 || queries.length>30) throw new TypeError('Too many provider inputs');
-  return {id:p.id,type:p.type,name:clean(p.name||p.id,100),enabled:p.enabled,feeds,queries,query:clean(p.query,200)};
+  if(p.kind==='saved-pull'&&p.type==='briefing')throw new TypeError('Saved pulls require a collectable source');
+  if(p.kind==='saved-pull'&&!(p.type==='rss'?feeds.length:p.type==='openalex'?clean(p.query):queries.length))throw new TypeError('Saved pull needs a feed or query');
+  return {id:p.id,type:p.type,name:clean(p.name||p.id,100),enabled:p.enabled,feeds,queries,query:clean(p.query,200),kind:p.kind==='saved-pull'?'saved-pull':undefined,context:clean(p.context,120)};
 }
 async function save(file, state) {
   await mkdir(dirname(file),{recursive:true}); const temp=file+'.'+randomUUID()+'.tmp';
@@ -95,7 +97,7 @@ export class NewsroomDiscovery {
     const records=items.map(x=>normalizeDiscovery(x,providerId,at));
     return this.mutate(s=>{let added=0;for(const r of records){const eventKey=sha(providerId+'\n'+r.id+'\n'+r.provenance.externalId+'\n'+r.provenance.rawRef);if(s.events.some(e=>e.key===eventKey))continue;
       s.events.push({key:eventKey,articleId:r.id,providerId,discoveredAt:at,provenance:r.provenance});
-      const existing=s.articles.find(a=>a.id===r.id);if(existing){existing.discoveredAt=at;existing.summary ||= r.summary;existing.topics=[...new Set([...existing.topics,...r.topics])];}else{s.articles.push(r);added++;}}
+      const existing=s.articles.find(a=>a.id===r.id);if(existing){existing.summary ||= r.summary;existing.topics=[...new Set([...existing.topics,...r.topics])];}else{s.articles.push(r);added++;}}
       return {added,events:records.length};});
   }
   async triage(id,decision){if(!['accept','defer','dismiss'].includes(decision))throw TypeError('Invalid decision');if(!this.state.articles.some(a=>a.id===id))throw TypeError('Unknown article');return this.mutate(s=>{s.triage[id]={decision,at:new Date().toISOString()};return s.triage[id];});}

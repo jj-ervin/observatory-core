@@ -12,11 +12,12 @@ test('versioned records preserve cross-provider discoveries and triage across re
     const file=join(dir,'news.json'),n=await NewsroomDiscovery.open(file);
     await n.configure({id:'research',type:'openalex',enabled:true,query:'governance'});
     const item={sourceUrl:'https://example.org/story?utm_source=a',title:'A finding',source:'Example',publishedAt:'2026-11-10',summary:'Summary',topics:['AI']};
-    assert.deepEqual(await n.ingest('rss',[item]),{added:1,events:1});
-    assert.deepEqual(await n.ingest('research',[{...item,sourceUrl:'https://example.org/story',rawRef:'work-1'}]),{added:0,events:1});
+    assert.deepEqual(await n.ingest('rss',[item],'2026-11-10T12:00:00.000Z'),{added:1,events:1});
+    assert.deepEqual(await n.ingest('research',[{...item,sourceUrl:'https://example.org/story',rawRef:'work-1'}],'2026-11-11T12:00:00.000Z'),{added:0,events:1});
     const id=n.list()[0].id;await n.triage(id,'accept');
     const reopened=await NewsroomDiscovery.open(file),record=reopened.list()[0];
     assert.equal(record.schema,'gc.discovery/1');assert.equal(record.reviewStatus,'accept');assert.deepEqual(record.providers,['rss','research']);
+    assert.equal(record.discoveredAt,'2026-11-10T12:00:00.000Z');
     assert.equal(reopened.state.events.length,2);
   }finally{await rm(dir,{recursive:true,force:true});}
 });
@@ -26,6 +27,15 @@ test('structured briefing imports require an explicit supported shape',async()=>
     await assert.rejects(n.importBriefing({items:[]}),/gc.daily-ai-news/);
     await n.importBriefing({schema:'gc.daily-ai-news/1',items:[{url:'https://example.org/article',title:'Daily briefing'}]});
     assert.equal(n.list()[0].providers[0],'daily-ai');assert.equal(n.providers().find(p=>p.id==='daily-ai').status.health,'ok');
+  }finally{await rm(dir,{recursive:true,force:true});}
+});
+test('saved topic pull persists with its research context and validates its inputs',async()=>{
+  const dir=await testDir();
+  try{const file=join(dir,'news.json'),n=await NewsroomDiscovery.open(file);
+    await assert.rejects(n.configure({id:'pull-empty',type:'rss',kind:'saved-pull',enabled:true,name:'Empty',feeds:[]}),/needs a feed or query/);
+    await n.configure({id:'pull-policy',type:'rss',kind:'saved-pull',enabled:true,name:'AI policy',context:'Client research',feeds:['https://example.org/feed.xml']});
+    const reopened=await NewsroomDiscovery.open(file),pull=reopened.providers().find(p=>p.id==='pull-policy');
+    assert.equal(pull.kind,'saved-pull');assert.equal(pull.context,'Client research');assert.deepEqual(pull.feeds,['https://example.org/feed.xml']);
   }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('normalization rejects unsafe article URLs and malformed title',()=>{
