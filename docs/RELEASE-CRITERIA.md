@@ -23,3 +23,7 @@ Install a pinned SDK artifact in an isolated non-GC consumer outside the source 
 ## Release preparation update — 2026-11-26
 
 Verified baseline `986a883804162aae3dc12228fe75354def8f34b6`: PR #48 merged, both CI workflows successful. SDK root imports, independent offline install, Linux/Windows matrix and CLI parity are now verified at the merged PR baselines (#46–#48); the historical table above is not current status. This increment adds a pinned previous-checkout package comparison, same-runner byte reproducibility and integrity checks, offline replacement/rollback preserving consumer data, and closed-store backup restoration. Results must be verified in CI. Both snapshots are still 0.1.4: this is an artifact replacement rehearsal, not proof of a semver upgrade or migration. No release is authorized. Independent egress/access review, comprehensive storage assurance, ownership/license/namespace, CRA/GC evidence, clean-machine and final pinned v1 artifact remain open.
+
+## Security and recovery follow-up
+
+PR #49 merged at `c3db1c416bd6c8948f13e2cccbc3b567bab198df`; both CI workflows passed. Same-version replacement/rollback, backup restoration and reproducibility rehearsal verified. This follow-up addresses deadline enforcement and stream cleanup plus asynchronous or explicitly rejected audit receipts failing closed. These are maintainer-side code review findings, not independent security certification. Host audit durability, production network controls, rights and distribution authorization, CRA/GC and a distinct versioned candidate remain open.
