@@ -1,23 +1,33 @@
-# Governance Commons Observatory Core
+# Observatory Core
 
-Independent, evidence-first publication contracts for the Governance Commons Observatory.
+Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; planned CLI, API, MCP and container assets consume it. Governance Commons is a governance source and consumer, not an embedded application dependency.
 
-**Status:** bootstrap; no benchmark execution or live publication pipeline yet.
+**Status:** private Node ESM package `@governancecommons/observatory-core` at `0.1.4`. Source modules and tests exist, but no SDK or Observatory CLI v1.0.0 release is claimed. API, MCP and container assets are planned. Existing GC publication scripts are legacy utilities, not the planned general CLI.
 
-## Architecture
-Core owns validated evidence and approved, checksum-pinned publication exports. The Astro website is a read-only consumer. Agent Matrix, Agent Dossier, Agent Roster and Registry retain independent normative/editorial authority.
+## Product baseline
 
-## Commands
-- `npm test` — positive and negative contract tests (Node.js 24)
-- `npm run validate:export -- manifest.json records.json` — validate an approved publication
+- [Charter](docs/PRODUCT-CHARTER.md), [asset register](docs/ASSET-REGISTER.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md)
+- [Release criteria and v1 gaps](docs/RELEASE-CRITERIA.md), [implementation backlog](docs/IMPLEMENTATION-BACKLOG.md), [changelog](CHANGELOG.md)
 
-## Newsroom discovery intake
+Historical `docs/OC-*` notes retain their proposal and experiment status; the current baseline governs asset and milestone mapping.
 
-`src/discovery/newsroom.mjs` provides the independent `gc.discovery/1` intake contract. It stores normalized articles, a separate history of provider discoveries, triage decisions, configuration and provider health in an atomic local JSON file. It does not change the publication evidence store or authorize publication. RSS and Atom use the existing bounded parser and DNS-pinned HTTPS transport. The default feed is NIST news; OpenAlex search is configurable. Brave web search requires `BRAVE_SEARCH_API_KEY`. GC Daily AI News is imported only from a supplied `gc.daily-ai-news/1` JSON object with an `items` array; there is no automation access.
+## Implemented modules
 
-ProPro packages this module as a pinned local tarball. Other clients may call `NewsroomDiscovery.open(file)`, then `providers`, `configure`, `collect`, `list`, `triage`, or `importBriefing` without ProPro. A saved pull is a provider with `kind: 'saved-pull'`, a name, an optional `context` for a topic, research effort, or client, and an RSS feed list, OpenAlex query, or Brave query list. ObCore validates and persists it; repeat sightings retain the article's original discovery date.
+- Domain-neutral records and in-memory, file and SQLite stores (`schemas/core/`, `src/core/`). Operational assurance remains open.
+- Feed ingestion, bounded transport, and `gc.discovery/1` newsroom intake (`src/ingestion/`, `src/discovery/newsroom.mjs`). Egress and unattended polling are not production approved. Newsroom supports RSS/Atom, OpenAlex, Brave and supplied briefing JSON; saved pulls retain the first discovery date.
+- SQLite research archive, references, search, scoped and governed read-only tools, access audit, and in-process/JSON integration (`src/research/`). A local Portal-style fixture does not prove deployed tenant authorization.
+- Legacy GC publication validation and deterministic candidate preparation (`src/contract.mjs`, `src/publish.mjs`, `scripts/`). Approval fields do not authenticate an approver.
 
-The publication manifest contract is specified in [GC–OBS.02 architecture](https://github.com/governancecommons/governance-commons-www/blob/main/docs/gc-obs-02-architecture-separation.md) (pending website PR #3). No claims of independent verification, certifications or rankings are implied.
+## Development checks
 
-## Safety
-Only publish records with explicit human approval and sufficient provenance. Do not commit private Dossier or Roster source data. Documentation-only records must not be promoted to benchmark evidence.
+Use Node.js 24 and Python 3.12, matching CI:
+
+```text
+npm test
+python -m pip install -r requirements-schema-test.txt
+python -m unittest discover -s tests -p test_core_schema.py
+```
+
+`npm run validate:export -- manifest.json records.json` validates a legacy GC export. `npm run prepare:publication` runs its legacy candidate utility. Neither grants release authority.
+
+Consumers own identity, access policy, editorial approval, source rights, model credentials, deployment and public release. Core preserves evidence, provenance and exact candidate bytes without asserting truth or authorization. Never commit private Dossier or Roster data or treat documentation-only records as benchmark evidence.
