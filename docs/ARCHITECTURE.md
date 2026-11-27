@@ -1,6 +1,6 @@
 # Observatory Core architecture
 
-The SDK (OC-A01) solely implements record validation, ingestion, provenance, retrieval, research tools, audit primitives and publication candidate preparation. The CLI (A02) calls supported SDK imports. The initial loopback API (A03) and local MCP (A04) hosts adapt authenticated requests to SDK operations; a future container (A05) packages a chosen host and SDK. No interface owns a second engine or approval policy.
+The SDK (OC-A01) solely implements record validation, ingestion, provenance, retrieval, research tools, audit primitives and publication candidate preparation. The CLI (A02) calls supported SDK imports. The initial loopback API (A03) and local MCP (A04) hosts adapt authenticated requests to SDK operations; the offline Linux container candidate (A05) packages the SDK and existing hosts. No interface owns a second engine or approval policy.
 
 `src/core/` and `schemas/core/0.1.0/` hold neutral records/stores; `src/discovery/newsroom.mjs` owns `gc.discovery/1`; `src/ingestion/` handles feeds/transport; `src/research/` owns archive, citations, read-only tools, audit and experimental integration/JSON transport. `src/contract.mjs`, `src/classification.mjs` and `src/publish.mjs` preserve legacy GC publication v1. The standalone private observatory-core package exposes a root SDK entry point; historical deep paths remain accessible.
 

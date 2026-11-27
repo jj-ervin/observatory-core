@@ -1,8 +1,8 @@
 # Observatory Core
 
-Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; CLI candidate and planned API, MCP and container assets consume it. Governance Commons is an optional specification source and consumer, not a governing authority or application dependency.
+Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; CLI, API, MCP and container candidates consume it. Governance Commons is an optional specification source and consumer, not a governing authority or application dependency.
 
-**Status:** private Node ESM package `observatory-core` at `1.2.0` (private-testing candidate; no public or production release claimed). API, MCP and container assets are planned. Existing GC publication scripts remain legacy utilities. The SDK-backed Observatory CLI candidate is documented below.
+**Status:** private Node ESM package `observatory-core` at `1.2.0` (private-testing candidate; no public or production release claimed). All five assets have candidate implementations; container verification is pending. Existing GC publication scripts remain legacy utilities. The SDK-backed Observatory CLI candidate is documented below.
 
 ## Ownership and distribution
 
@@ -53,3 +53,7 @@ See [API usage](docs/API.md) for the authenticated loopback research and evidenc
 ## Observatory MCP candidate
 
 See [MCP usage](docs/MCP.md) for the local, read-only, host-scoped stdio server. Private testing only.
+
+## Observatory Container candidate
+
+See [Container usage](docs/CONTAINER.md) for hardened offline Linux container operation and recovery.
