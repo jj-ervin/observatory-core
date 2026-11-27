@@ -27,3 +27,7 @@ Verified baseline `986a883804162aae3dc12228fe75354def8f34b6`: PR #48 merged, bot
 ## Security and recovery follow-up
 
 PR #49 merged at `c3db1c416bd6c8948f13e2cccbc3b567bab198df`; both CI workflows passed. Same-version replacement/rollback, backup restoration and reproducibility rehearsal verified. This follow-up addresses deadline enforcement and stream cleanup plus asynchronous or explicitly rejected audit receipts failing closed. These are maintainer-side code review findings, not independent security certification. Host audit durability, production network controls, rights and distribution authorization, CRA/GC and a distinct versioned candidate remain open.
+
+## OC-SEC-002 remediation candidate
+
+Independent AI-assisted OC-SEC-001 review merged in #51 (conditional pass). Finding 1 is addressed by owner-only POSIX database creation, existing-file hardening and sidecar checks across evidence, research, audit and legacy audit migration. New regression tests replace the vulnerability reproduction with secure expectations. CI and reviewer confirmation required. Quiesce legacy stores before remediation; previous exposure cannot be undone. Use owner-controlled directories with trusted ancestor paths. Windows ACLs, deployment egress, external audit anchors and independent production assurance remain outside this fix. Finding 2 (action pinning) remains nonblocking.

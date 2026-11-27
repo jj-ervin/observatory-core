@@ -4,6 +4,7 @@
  * Appends replay history through core integrity rules; reads use SQL indexes.
  */
 import {DatabaseSync} from "node:sqlite";
+import {preparePrivateSQLite,protectSQLiteSidecars} from "./sqlite-permissions.mjs";
 import {resolve,dirname} from "node:path";
 import {mkdir} from "node:fs/promises";
 import {InMemoryEvidenceStore} from "./store.mjs";
@@ -16,6 +17,7 @@ export class SQLiteEvidenceStore {
     if(!Number.isSafeInteger(busyTimeout)||busyTimeout<0||busyTimeout>60000) throw new RangeError("invalid busy timeout");
     const path=resolve(filePath);
     await mkdir(dirname(path),{recursive:true});
+    preparePrivateSQLite(path);
     const db=new DatabaseSync(path);
     try {
       // Set busy timeout before any PRAGMA that may need a write lock.
@@ -28,6 +30,7 @@ export class SQLiteEvidenceStore {
       db.exec("CREATE INDEX IF NOT EXISTS evidence_records_type_seq_idx ON evidence_records(record_type,seq)");
       const adapter=new SQLiteEvidenceStore(db);
       adapter.#load();
+      protectSQLiteSidecars(path);
       return adapter;
     } catch(error) {db.close();throw error;}
   }
