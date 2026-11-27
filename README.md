@@ -1,8 +1,8 @@
 # Observatory Core
 
-Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; planned CLI, API, MCP and container assets consume it. Governance Commons is a governance source and consumer, not an embedded application dependency.
+Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; CLI candidate and planned API, MCP and container assets consume it. Governance Commons is a governance source and consumer, not an embedded application dependency.
 
-**Status:** private Node ESM package `@governancecommons/observatory-core` at `0.1.4`. Source modules and tests exist, but no SDK or Observatory CLI v1.0.0 release is claimed. API, MCP and container assets are planned. Existing GC publication scripts are legacy utilities, not the planned general CLI.
+**Status:** private Node ESM package `@governancecommons/observatory-core` at `0.1.4`. Source modules and tests exist, but no SDK or Observatory CLI v1.0.0 release is claimed. API, MCP and container assets are planned. Existing GC publication scripts remain legacy utilities. The SDK-backed Observatory CLI candidate is documented below.
 
 ## Product baseline
 
@@ -21,6 +21,10 @@ Historical `docs/OC-*` notes retain their proposal and experiment status; the cu
 ## SDK package candidate
 
 See [SDK package candidate](docs/SDK-PACKAGE.md) for root imports and independent offline installation. No v1 release is claimed.
+
+## Observatory CLI candidate
+
+See [CLI usage](docs/CLI.md) for installed commands, local discovery, evidence, research search and publication validation.
 
 ## Development checks
 

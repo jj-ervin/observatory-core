@@ -31,5 +31,12 @@ try{
     "const candidate=preparePublication(input);assert.deepEqual(validatePublication(candidate.manifest,candidate.recordsBytes),[]);assert.deepEqual(candidate.recordsBytes,preparePublication(input).recordsBytes);"
   ].join('\n'));
   execFileSync(process.execPath,['exercise.mjs'],{cwd:consumer,stdio:'inherit'});
-  console.log('Independent offline SDK installation and provenance round trip passed');
+  const installed=join(consumer,'node_modules','@governancecommons','observatory-core','src','cli.mjs');
+  const help=execFileSync(process.execPath,[installed,'--help'],{cwd:consumer,encoding:'utf8'});
+  assert.match(help,/Observatory CLI/);
+  const shim=join(consumer,'node_modules','.bin',process.platform==='win32'?'observatory.cmd':'observatory');
+  await import('node:fs/promises').then(fs=>fs.access(shim));
+  const output=execFileSync(process.execPath,[installed,'discovery','list','--store','news.json'],{cwd:consumer,encoding:'utf8'});
+  assert.equal(JSON.parse(output)[0].title,'Synthetic');
+  console.log('Independent offline SDK and CLI installation and provenance round trip passed');
 }finally{await rm(dir,{recursive:true,force:true});}
