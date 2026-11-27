@@ -11,7 +11,7 @@ These product work items map to approved milestones. Existing issues and histori
 | Egress, access, storage and recovery assurance | #50–#52 merged; independent remediation confirmation and deployment gates open | M03/A01 | OC-08C and OC-06 gates, threat/retention/rights review, failure evidence and environment matrix |
 | License, ownership, package identity and distribution | owner/proprietary/private audience approved; standalone name and notice candidate; remaining rights/channel review open | M04/A01 | Maintainer records rights/publisher/namespace authorization; artifact verified without premature version change |
 | SDK-backed CLI | merged #48; Linux/Windows CI passed | M05/A02 | Commands, help/errors, parity, offline fixture and install tests pass |
-| Private SDK/CLI release assurance | RC1 merged #53/#54; combined CI passed; CRA pilot blocked pending adjudication | M06/A01–A02 | CRA, applicable GC conformance, pinned artifacts, release criteria and authorization complete |
+| Private SDK/CLI release assurance | RC1 merged #55; CI and CRA adjudication validated; private-testing 1.0.0 candidate pending CI | M06/A01–A02 | Scoped CRA, pinned artifact, private-testing boundary, authorized handoff; public release gates separate |
 | Research API | planned | M07/A03 | Asset register API criteria met in separate scope |
 | MCP server | planned | M08/A04 | Asset register MCP criteria met in separate scope |
 | Container | planned | M09/A05 | Asset register container criteria met in separate scope |

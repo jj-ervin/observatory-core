@@ -2,6 +2,11 @@
 
 Entries describe repository changes, not inferred package releases. The package remains private. Release-candidate source versions do not imply publication.
 
+## 1.0.0 — private-testing candidate (not public or production released)
+
+- Record private-then-public strategy; standalone proprietary SDK/CLI testing scope and support/recovery guidance.
+- Verify installed CLI shim, build/install and migration on both supported platforms. No schema change or public publication.
+
 ## 1.0.0-rc.1 — candidate preparation (unpublished)
 
 - Maintainer-approved Osprey Strategic Holdings LLC ownership and proprietary notices, with private distribution and package inclusion verification.

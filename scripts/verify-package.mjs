@@ -39,6 +39,8 @@ try{
   assert.match(help,/Observatory CLI/);
   const shim=join(consumer,'node_modules','.bin',process.platform==='win32'?'observatory.cmd':'observatory');
   await import('node:fs/promises').then(fs=>fs.access(shim));
+  const version=run(['exec','--offline','--','observatory','--version'],consumer).trim();
+  assert.equal(version,packed.version,'installed CLI shim version');
   const output=execFileSync(process.execPath,[installed,'discovery','list','--store','news.json'],{cwd:consumer,encoding:'utf8'});
   assert.equal(JSON.parse(output)[0].title,'Synthetic');
   console.log('Independent offline SDK and CLI installation and provenance round trip passed');
