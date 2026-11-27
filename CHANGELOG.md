@@ -1,6 +1,15 @@
 # Changelog
 
-Entries describe repository changes, not inferred package releases. The package remains private at `0.1.4`.
+Entries describe repository changes, not inferred package releases. The package remains private. Release-candidate source versions do not imply publication.
+
+## 1.0.0-rc.1 — candidate preparation (unpublished)
+
+- Structured scholarly metadata and compatibility (#44); publication invariants (#45).
+- SDK entry point, package fixture and Windows/Linux checks (#46–#47); SDK-backed CLI (#48).
+- Reproducibility, offline replacement, rollback and backup rehearsal (#49).
+- Retrieval deadlines, cancellation and audit fail-closed behavior (#50).
+- Independent AI-assisted security review (#51); POSIX SQLite owner-only permissions and concurrency remediation (#52).
+- Candidate version and in-place upgrade/rollback fixture against pinned 0.1.4; no schema-version change, registry publication, release tag or production approval.
 
 ## Unreleased — OC-PD-001
 
