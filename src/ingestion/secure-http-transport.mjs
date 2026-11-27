@@ -16,19 +16,24 @@ function publicAddress(address){
   const v=address.toLowerCase();
   if(v.includes("."))return false;
   const first=parseInt(v.split(":")[0]||"0",16);
-  return !(v==="::"||v==="::1"||v.startsWith("::ffff:")||(first&0xfe00)===0xfc00||(first&0xffc0)===0xfe80||(first&0xff00)===0xff00||first===0x2001);
+  const second=parseInt(v.split(":")[1]||"0",16);
+  // Conservative global-unicast allowlist. Reject transition, documentation,
+  // benchmarking and other special-use prefixes rather than guessing routability.
+  return (first&0xe000)===0x2000 && first!==0x2001 && first!==0x2002 && !(first===0x3fff && (second&0xf000)===0);
  }
  return false;
 }
 export function createSecureFeedTransport({allowedHosts,approvedAddresses,resolveHost=dnsLookup}={}){
- if(!Array.isArray(allowedHosts)||allowedHosts.length===0||allowedHosts.some(h=>typeof h!=="string"||!h||h!==h.toLowerCase()||h.includes(":")||h.includes("/")))
+ if(!Array.isArray(allowedHosts)||allowedHosts.length===0||allowedHosts.some(h=>typeof h!=="string"||!h||h!==h.toLowerCase()||! /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(h)||h.length>253||isIP(h)))
   throw new TypeError("explicit lowercase allowedHosts required");
  const hosts=new Set(allowedHosts);
+ const pins=new Map();
  // Explicit IP approval is mandatory until comprehensive public-address classification is reviewed.
  if(!approvedAddresses || typeof approvedAddresses!=="object" || Array.isArray(approvedAddresses))throw new TypeError("approvedAddresses required");
  for(const host of hosts){
   const ips=approvedAddresses[host];
   if(!Array.isArray(ips)||ips.length===0||ips.some(ip=>!publicAddress(ip)))throw new TypeError("public approvedAddresses required for "+host);
+  pins.set(host,new Set(ips));
  }
  return async function transport(url,{signal,redirect}={}){
   const u=new URL(url);
@@ -36,13 +41,13 @@ export function createSecureFeedTransport({allowedHosts,approvedAddresses,resolv
    throw new TypeError("destination not authorized");
   if(redirect!=="error")throw new TypeError("redirect rejection required");
   const addresses=await resolveHost(u.hostname,{all:true,verbatim:true});
-  const approved=new Set(approvedAddresses[u.hostname]);
-  if(!Array.isArray(addresses)||addresses.length===0||addresses.some(a=>!publicAddress(a.address)||!approved.has(a.address)))
+  const approved=pins.get(u.hostname);
+  if(!Array.isArray(addresses)||addresses.length===0||addresses.some(a=>!a||!publicAddress(a.address)||a.family!==isIP(a.address)||!approved.has(a.address)))
    throw new Error("unsafe DNS resolution");
   if(signal?.aborted)throw new Error("retrieval aborted");
   const pinned=addresses[0];
   return new Promise((resolve,reject)=>{
-   const req=https.get(u,{signal,lookup:(_host,options,callback)=>options?.all?callback(null,[{address:pinned.address,family:pinned.family}]):callback(null,pinned.address,pinned.family),headers:{accept:"application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.8"}},res=>{
+   const req=https.get(u,{signal,agent:false,lookup:(_host,options,callback)=>options?.all?callback(null,[{address:pinned.address,family:pinned.family}]):callback(null,pinned.address,pinned.family),headers:{accept:"application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.8"}},res=>{
     const status=res.statusCode??0;
     if(status!==200){res.destroy();reject(new Error("feed HTTP status "+status));return;}
     // Adapt Node stream to WHATWG stream; retrieveFeed enforces byte limits.

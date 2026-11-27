@@ -13,3 +13,6 @@ Remaining security review before any automated polling:
 - Independent security review and explicit approval are required before production activation.
 
 OC-08D polling remains blocked on this gate.
+## Follow-up hardening candidate
+
+Restrict IPv6 to conservative global-unicast prefixes, reject ambiguous allowlist hostnames and inconsistent DNS families, snapshot approved pins, and disable shared HTTPS agent reuse so each request honors its selected pin. Regression tests cover rejection before socket creation. This is not comprehensive special-use registry classification or independent security review. Newsroom RSS currently derives its initial pins from DNS; explicit host-owner approval and network-level egress controls remain open production gates.

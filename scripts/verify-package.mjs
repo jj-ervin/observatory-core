@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
-import {mkdir,mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';
-import {join,resolve} from 'node:path';
+import {mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const scratch=join(root,'.scratch');await mkdir(scratch,{recursive:true});
 const dir=await mkdtemp(join(scratch,'sdk-package-'));
-const npm=process.platform==='win32'?'npm.cmd':'npm';
-function run(args,cwd){return execFileSync(npm,args,{cwd,encoding:'utf8',shell:process.platform==='win32',env:{...process.env,npm_config_audit:'false',npm_config_fund:'false'}});}
+const npm=process.env.npm_execpath;
+if(!npm)throw new Error('Run through npm run test:package');
+function run(args,cwd){return execFileSync(process.execPath,[npm,...args],{cwd,encoding:'utf8',env:{...process.env,npm_config_audit:'false',npm_config_fund:'false'}});}
 try{
   const [packed]=JSON.parse(run(['pack','--json','--pack-destination',dir],root));
   assert.ok(packed.files.some(f=>f.path==='schemas/core/0.1.0/records.schema.json'));
