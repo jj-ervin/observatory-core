@@ -4,6 +4,7 @@
  * Audit sink is synchronous so governed tools can fail closed.
  */
 import {DatabaseSync} from "node:sqlite";
+import {preparePrivateSQLite} from "../core/sqlite-permissions.mjs";
 import {mkdir} from "node:fs/promises";
 import {dirname,resolve} from "node:path";
 import {GENESIS,digest} from "./audit-chain.mjs";
@@ -14,6 +15,7 @@ export class SQLiteResearchAccessAudit {
   if(typeof filePath!=="string"||!filePath.trim())throw new TypeError("file path required");
   const path=resolve(filePath);
   await mkdir(dirname(path),{recursive:true});
+  preparePrivateSQLite(path);
   const db=new DatabaseSync(path);
   try{
    db.exec("PRAGMA busy_timeout=5000");

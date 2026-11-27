@@ -3,10 +3,14 @@
  * Run only after taking and retaining a verified backup.
  */
 import {DatabaseSync} from "node:sqlite";
+import {resolve} from "node:path";
+import {preparePrivateSQLite} from "../core/sqlite-permissions.mjs";
 import {GENESIS,digest} from "./audit-chain.mjs";
 export function migrateLegacyResearchAudit(filePath,{backupConfirmed=false}={}){
  if(typeof filePath!=="string"||!filePath.trim()||backupConfirmed!==true)throw new TypeError("file path and confirmed backup required");
- const db=new DatabaseSync(filePath);
+ const path=resolve(filePath);
+ preparePrivateSQLite(path,{create:false});
+ const db=new DatabaseSync(path);
  try{
   db.exec("PRAGMA busy_timeout=5000");
   db.exec("PRAGMA synchronous=FULL");

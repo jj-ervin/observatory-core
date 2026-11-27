@@ -3,6 +3,7 @@
  * Independent of evidence record schemas; capture/source refs must be checked by caller.
  */
 import {DatabaseSync} from "node:sqlite";
+import {preparePrivateSQLite} from "../core/sqlite-permissions.mjs";
 import {mkdir} from "node:fs/promises";
 import {resolve,dirname} from "node:path";
 import {makeResearchDocument,makeResearchPassage,makeResearchCitation} from "./references.mjs";
@@ -13,6 +14,7 @@ export class SQLiteResearchArchive {
   if(typeof filePath!=="string"||!filePath.trim())throw new TypeError("file path required");
   const path=resolve(filePath);
   await mkdir(dirname(path),{recursive:true});
+  preparePrivateSQLite(path);
   const db=new DatabaseSync(path);
   try{
    db.exec("PRAGMA busy_timeout=5000");
