@@ -18,12 +18,17 @@ Historical `docs/OC-*` notes retain their proposal and experiment status; the cu
 - SQLite research archive, references, search, scoped and governed read-only tools, access audit, and in-process/JSON integration (`src/research/`). A local Portal-style fixture does not prove deployed tenant authorization.
 - Legacy GC publication validation and deterministic candidate preparation (`src/contract.mjs`, `src/publish.mjs`, `scripts/`). Approval fields do not authenticate an approver.
 
+## SDK package candidate
+
+See [SDK package candidate](docs/SDK-PACKAGE.md) for root imports and independent offline installation. No v1 release is claimed.
+
 ## Development checks
 
 Use Node.js 24 and Python 3.12, matching CI:
 
 ```text
 npm test
+npm run test:package
 python -m pip install -r requirements-schema-test.txt
 python -m unittest discover -s tests -p test_core_schema.py
 ```

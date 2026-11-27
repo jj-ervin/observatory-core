@@ -5,9 +5,9 @@ These product work items map to approved milestones. Existing issues and histori
 | Work item | Status | Milestone/asset | Done when |
 | --- | --- | --- | --- |
 | OC-SM-001 structured scholarly metadata, [issue #42](https://github.com/jj-ervin/observatory-core/issues/42) | merged; PR CI passed ([#44](https://github.com/jj-ervin/observatory-core/pull/44)) | M01/A01 | Supplied DOI, ordered authors/IDs, date/precision, venue, abstract, type, access and retraction metadata retained; unknowns remain unknown; duplicate merge, persistence and backward compatibility tests pass; ProPro/Gen-B field contract documented |
-| Publication invariants in [PR #3](https://github.com/jj-ervin/observatory-core/pull/3) | carried forward; candidate CI pending | M01–M02/A01 | Evaluate on current main; preserve GC v1; merge or supersede through review |
-| Readiness overlap in [PR #40](https://github.com/jj-ervin/observatory-core/pull/40) | supersession proposed | M02/A01 | Canonical README and release criteria from #43 plus retained external-consumer acceptance details; close old draft only after review |
-| Stable SDK imports and non-GC package fixture | planned | M02–M04/A01 | Document/test public paths, errors, pinned private install and provenance round trip |
+| Publication invariants in [PR #3](https://github.com/jj-ervin/observatory-core/pull/3) | merged; PR #45 CI passed | M01–M02/A01 | Evaluate on current main; preserve GC v1; merge or supersede through review |
+| Readiness overlap in [PR #40](https://github.com/jj-ervin/observatory-core/pull/40) | superseded in merged #45; old draft retained | M02/A01 | Canonical README and release criteria from #43 plus retained external-consumer acceptance details; close old draft only after review |
+| Stable SDK imports and non-GC package fixture | SDK candidate and package fixture added; CI pending | M02–M04/A01 | Document/test public paths, errors, pinned private install and provenance round trip |
 | Egress, access, storage and recovery assurance | open | M03/A01 | OC-08C and OC-06 gates, threat/retention/rights review, failure evidence and environment matrix |
 | License, ownership, package identity and distribution | open | M04/A01 | Maintainer records rights/publisher/namespace authorization; artifact verified without premature version change |
 | SDK-backed CLI | planned | M05/A02 | Commands, help/errors, parity, offline fixture and install tests pass |
