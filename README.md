@@ -1,12 +1,12 @@
 # Observatory Core
 
-Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; CLI candidate and planned API, MCP and container assets consume it. Governance Commons is a governance source and consumer, not an embedded application dependency.
+Asset-oriented research and evidence infrastructure. The Observatory Core SDK is the canonical engine; CLI candidate and planned API, MCP and container assets consume it. Governance Commons is an optional specification source and consumer, not a governing authority or application dependency.
 
-**Status:** private Node ESM package `observatory-core` at `1.0.0-rc.1` (unpublished release candidate). Source modules and tests exist, but no SDK or Observatory CLI v1.0.0 release is claimed. API, MCP and container assets are planned. Existing GC publication scripts remain legacy utilities. The SDK-backed Observatory CLI candidate is documented below.
+**Status:** private Node ESM package `observatory-core` at `1.0.0` (private-testing candidate; no public or production release claimed). API, MCP and container assets are planned. Existing GC publication scripts remain legacy utilities. The SDK-backed Observatory CLI candidate is documented below.
 
 ## Ownership and distribution
 
-Copyright (c) 2026 Osprey Strategic Holdings LLC. All rights reserved. Proprietary software; see [LICENSE](LICENSE). The approved release audience is private SDK/CLI distribution to authorized users. Public source visibility does not grant an open-source license. No registry publication or final release is authorized by this notice.
+Copyright (c) 2026 Osprey Strategic Holdings LLC. All rights reserved. Proprietary software; see [LICENSE](LICENSE). The approved strategy is private testing followed by a separately authorized public release. Public source visibility does not grant an open-source license. No registry publication or public release is authorized by this notice. See [private testing instructions](docs/PRIVATE-TESTING.md).
 
 ## Product baseline
 
@@ -24,7 +24,7 @@ Historical `docs/OC-*` notes retain their proposal and experiment status; the cu
 
 ## SDK package candidate
 
-See [SDK package candidate](docs/SDK-PACKAGE.md) for root imports and independent offline installation. No v1 release is claimed.
+See [SDK package candidate](docs/SDK-PACKAGE.md) for root imports and independent offline installation. The candidate is intended for controlled private testing only.
 
 ## Observatory CLI candidate
 
