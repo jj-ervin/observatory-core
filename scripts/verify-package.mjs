@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir,mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {execFileSync} from 'node:child_process';
+import {execFileSync,spawn} from 'node:child_process';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const scratch=join(root,'.scratch');await mkdir(scratch,{recursive:true});
 const dir=await mkdtemp(join(scratch,'sdk-package-'));
@@ -43,5 +43,21 @@ try{
   assert.equal(version,packed.version,'installed CLI shim version');
   const output=execFileSync(process.execPath,[installed,'discovery','list','--store','news.json'],{cwd:consumer,encoding:'utf8'});
   assert.equal(JSON.parse(output)[0].title,'Synthetic');
+  const apiConfig=join(consumer,'api-config.json');
+  const token=(await import('node:crypto')).randomBytes(32).toString('base64url');
+  // Reserve an ephemeral port briefly; the actual child must bind it successfully.
+  const reservation=(await import('node:net')).createServer();
+  await new Promise(resolve=>reservation.listen(0,'127.0.0.1',resolve));
+  const port=reservation.address().port;await new Promise(resolve=>reservation.close(resolve));
+  await writeFile(apiConfig,JSON.stringify({port,archive:join(consumer,'archive.sqlite'),audit:join(consumer,'audit.sqlite'),workspace:{evidence:join(consumer,'evidence.sqlite'),discovery:join(consumer,'news.json'),operationAudit:join(consumer,'ops.sqlite')},principals:[{subject:'fixture',token,documentIds:[],actions:[],permissions:['evidence:read','discovery:read']}]}),{mode:0o600});
+  const api=spawn(process.execPath,[join(consumer,'node_modules','observatory-core','src','api','start.mjs')],{cwd:consumer,env:{...process.env,OBSERVATORY_API_CONFIG:apiConfig},stdio:['ignore','pipe','pipe']});
+  const exited=new Promise(resolve=>api.once('exit',resolve));
+  try{
+   await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('API startup timeout')),10000);api.once('error',e=>{clearTimeout(timer);reject(e);});api.once('exit',()=>{clearTimeout(timer);reject(Error('API exited before startup'));});let text='';api.stdout.on('data',chunk=>{text+=chunk;if(text.includes('\n')){clearTimeout(timer);resolve();}});});
+   const response=await fetch('http://127.0.0.1:'+port+'/v1/evidence/get',{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({ref:'evidence:e@1'}),signal:AbortSignal.timeout(5000)});
+   assert.equal(response.status,200);assert.equal((await response.json()).result.assertion,'Synthetic');
+   const denied=await fetch('http://127.0.0.1:'+port+'/v1/evidence/list',{method:'POST',headers:{'content-type':'application/json'},body:'{}',signal:AbortSignal.timeout(5000)});assert.equal(denied.status,401);
+   console.log('Independent installed API process and HTTP consumer passed');
+  }finally{if(api.exitCode===null&&api.signalCode===null)api.kill();await exited;}
   console.log('Independent offline SDK and CLI installation and provenance round trip passed');
 }finally{await rm(dir,{recursive:true,force:true});}

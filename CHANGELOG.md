@@ -2,6 +2,11 @@
 
 Entries describe repository changes, not inferred package releases. The package remains private. Release-candidate source versions do not imply publication.
 
+## 1.1.0 — API private-testing candidate
+
+- SDK-backed HTTP discovery, evidence, archive and publication validation; explicit workspace permissions, persistent authorization audit, OpenAPI and installed service smoke.
+- Fixed-provider OpenAlex collection opt-in only; no remote deployment or public release.
+
 ## 1.0.0 — private-testing candidate (not public or production released)
 
 - Record private-then-public strategy; standalone proprietary SDK/CLI testing scope and support/recovery guidance.

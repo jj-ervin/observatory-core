@@ -10,7 +10,7 @@ Milestones are product delivery gates, not GC PASS identities. **Open** means fu
 | OC-M04 SDK packaging and distribution readiness | RC1 verified; v1 candidate pending CI | Owner/license/private distribution decisions; reproducible pinned artifact, integrity and clean-machine install proof; correct semver | A01 |
 | OC-M05 CLI development | Implemented; CI verified #48 | SDK-backed commands, help/errors, offline fixture, parity and install tests | A02 |
 | OC-M06 SDK and CLI v1.0 private testing | Candidate preparation | Verified private SDK/CLI 1.0.0 artifact, bounded testing restrictions, authorized handoff and recorded test feedback | A01, A02 |
-| OC-M07 Research API development | Initial research slice implemented; CI pending | Authenticated SDK-backed endpoints, denial/audit/integration tests and operations contract | A03 |
+| OC-M07 Research API development | Workspace API candidate; verification pending | Authenticated SDK-backed endpoints, denial/audit/integration tests and operations contract | A03 |
 | OC-M08 MCP server development | Planned | Versioned least-privilege SDK-backed tools, protocol/adversarial tests, host auth/audit proof | A04 |
 | OC-M09 Container deployment | Planned | Reproducible hardened image, environment/rollback checks and scan | A05 |
 

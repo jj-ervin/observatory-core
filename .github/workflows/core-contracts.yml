@@ -26,7 +26,7 @@ jobs:
         run: npm run build
       - name: Independent offline package fixture against built tarball
         env:
-          OC_PACKAGE_ARTIFACT: ${{ github.workspace }}/dist/observatory-core-1.0.0.tgz
+          OC_PACKAGE_ARTIFACT: ${{ github.workspace }}/dist/observatory-core-1.1.0.tgz
         run: npm run test:package
       - uses: actions/checkout@v4
         with:
