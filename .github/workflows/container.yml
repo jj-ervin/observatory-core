@@ -37,9 +37,13 @@ jobs:
       - name: Hardened runtime and recovery
         run: bash scripts/verify-container.sh observatory-private:a
       - name: Vulnerability scan
-        uses: aquasecurity/trivy-action@0.34.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: observatory-private:a
+          version: v0.70.0
+          scanners: vuln
+          cache: 'false'
+          cache-dir: ${{ github.workspace }}/.scratch/container/trivy
           format: table
           severity: HIGH,CRITICAL
           exit-code: '1'
