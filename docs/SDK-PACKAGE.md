@@ -1,0 +1,7 @@
+# SDK package candidate — OC-M02 / OC-A01
+
+Install a private pinned tarball using npm pack and npm install --offline /path/to/artifact.tgz on Node 24. Package identity and version remain unchanged. Import named exports from @governancecommons/observatory-core (ESM). The candidate root entry point exposes InMemoryEvidenceStore, SQLiteEvidenceStore, recordRef, RECORD_TYPES, NewsroomDiscovery, normalizeDiscovery, DISCOVERY_SCHEMA, SQLiteResearchArchive, createResearchIntegration, RESEARCH_CONTRACT_VERSION, preparePublication, validatePublication and sha256. Existing deep imports remain accessible; do not add a restrictive exports map until downstream migration is verified. Other source paths are not newly promised stable. Current errors and contract versions are preserved; consult module-specific docs for validation and authority boundaries. No production or v1 stability guarantee yet.
+
+The prior tarball included src only, despite schema-validation.mjs loading schemas/core/0.1.0/records.schema.json. Include schemas and existing scripts so installed consumers can validate records and use the legacy utilities. No new dependencies.
+
+Run npm run test:package to pack, install offline into an isolated consumer under repository-local .scratch, and verify schema-backed evidence, SQLite reopen, discovery, legacy imports, and deterministic publication candidate validation. No external providers or private application dependencies. CI runs the fixture on Ubuntu/Node 24. Windows package testing and release authorization remain open.
