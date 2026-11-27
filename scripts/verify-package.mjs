@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {verifyInstalledMcp} from './verify-mcp.mjs';
 import {mkdir,mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -59,5 +60,6 @@ try{
    const denied=await fetch('http://127.0.0.1:'+port+'/v1/evidence/list',{method:'POST',headers:{'content-type':'application/json'},body:'{}',signal:AbortSignal.timeout(5000)});assert.equal(denied.status,401);
    console.log('Independent installed API process and HTTP consumer passed');
   }finally{if(api.exitCode===null&&api.signalCode===null)api.kill();await exited;}
+  await verifyInstalledMcp(consumer);
   console.log('Independent offline SDK and CLI installation and provenance round trip passed');
 }finally{await rm(dir,{recursive:true,force:true});}

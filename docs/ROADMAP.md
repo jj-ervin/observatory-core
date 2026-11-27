@@ -11,7 +11,7 @@ Milestones are product delivery gates, not GC PASS identities. **Open** means fu
 | OC-M05 CLI development | Implemented; CI verified #48 | SDK-backed commands, help/errors, offline fixture, parity and install tests | A02 |
 | OC-M06 SDK and CLI v1.0 private testing | Candidate preparation | Verified private SDK/CLI 1.0.0 artifact, bounded testing restrictions, authorized handoff and recorded test feedback | A01, A02 |
 | OC-M07 Research API development | Workspace API candidate; verification pending | Authenticated SDK-backed endpoints, denial/audit/integration tests and operations contract | A03 |
-| OC-M08 MCP server development | Planned | Versioned least-privilege SDK-backed tools, protocol/adversarial tests, host auth/audit proof | A04 |
+| OC-M08 MCP server development | Local stdio candidate; verification pending | Versioned least-privilege SDK-backed tools, protocol/adversarial tests, host auth/audit proof | A04 |
 | OC-M09 Container deployment | Planned | Reproducible hardened image, environment/rollback checks and scan | A05 |
 
 OC-SM-001 ([issue #42](https://github.com/jj-ervin/observatory-core/issues/42)) is an M01 work item: preserve structured scholarly metadata, DOI normalization, provenance, duplicate behavior, persistence and `gc.discovery/1` compatibility. Earlier OC-00/01/02 etc. document increment history, not competing milestone numbers.

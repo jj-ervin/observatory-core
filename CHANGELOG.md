@@ -2,6 +2,11 @@
 
 Entries describe repository changes, not inferred package releases. The package remains private. Release-candidate source versions do not imply publication.
 
+## 1.2.0 — MCP private-testing candidate
+
+- Local stdio MCP 2025-11-25 adapter; host-scoped read-only research/evidence/discovery and candidate validation tools; durable audit and untrusted-data marking.
+- Protocol and installed subprocess tests; no remote deployment or public release.
+
 ## 1.1.0 — API private-testing candidate
 
 - SDK-backed HTTP discovery, evidence, archive and publication validation; explicit workspace permissions, persistent authorization audit, OpenAPI and installed service smoke.
