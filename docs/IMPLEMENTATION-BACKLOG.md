@@ -10,8 +10,8 @@ These product work items map to approved milestones. Existing issues and histori
 | Stable SDK imports and non-GC package fixture | merged #46/#47; Linux/Windows package CI passed | M02–M04/A01 | Document/test public paths, errors, pinned private install and provenance round trip |
 | Egress, access, storage and recovery assurance | open | M03/A01 | OC-08C and OC-06 gates, threat/retention/rights review, failure evidence and environment matrix |
 | License, ownership, package identity and distribution | open | M04/A01 | Maintainer records rights/publisher/namespace authorization; artifact verified without premature version change |
-| SDK-backed CLI | candidate implemented; CI pending | M05/A02 | Commands, help/errors, parity, offline fixture and install tests pass |
-| Private SDK/CLI release assurance | planned | M06/A01–A02 | CRA, applicable GC conformance, pinned artifacts, release criteria and authorization complete |
+| SDK-backed CLI | merged #48; Linux/Windows CI passed | M05/A02 | Commands, help/errors, parity, offline fixture and install tests pass |
+| Private SDK/CLI release assurance | reproducibility and recovery fixture submitted; CI pending | M06/A01–A02 | CRA, applicable GC conformance, pinned artifacts, release criteria and authorization complete |
 | Research API | planned | M07/A03 | Asset register API criteria met in separate scope |
 | MCP server | planned | M08/A04 | Asset register MCP criteria met in separate scope |
 | Container | planned | M09/A05 | Asset register container criteria met in separate scope |
