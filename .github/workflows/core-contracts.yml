@@ -26,7 +26,7 @@ jobs:
         run: npm run test:package
       - uses: actions/checkout@v4
         with:
-          ref: eec77eb8f4c5e4d49e3647c22be36ce16ee2d6af
+          ref: cdb77310216744eeac38a676d16ea5f3d85b6af1
           path: .scratch/release-baseline
       - name: Reproducibility, upgrade, rollback and backup fixture
         env:

@@ -19,7 +19,7 @@ async function pack(source,name){
  const path=join(out,p.filename),bytes=await readFile(path);
  assert.equal(p.integrity,'sha512-'+createHash('sha512').update(bytes).digest('base64'));
  assert.equal(p.shasum,createHash('sha1').update(bytes).digest('hex'));
- return {path,hash:digest(bytes),files:p.files.map(f=>f.path).sort()};
+ return {path,hash:digest(bytes),version:p.version,files:p.files.map(f=>f.path).sort()};
 }
 try{
  const a=await pack(root,'candidate-a'),b=await pack(root,'candidate-b');
@@ -27,13 +27,20 @@ try{
  assert.deepEqual(a.files,b.files);
  const old=await pack(baseline,'baseline');
  assert.notEqual(old.hash,a.hash);
+ assert.equal(old.version,'0.1.4');
+ assert.equal(a.version,JSON.parse(await readFile(join(root,'package.json'),'utf8')).version);
+ assert.notEqual(a.version,old.version,'versioned upgrade must replace a distinct version');
  const consumer=join(dir,'consumer');await mkdir(consumer);
  await writeFile(join(consumer,'package.json'),JSON.stringify({name:'release-fixture',private:true,type:'module'}));
  const install=async artifact=>{
-  // Baseline and candidate intentionally share 0.1.4. Force actual replacement
-  // by removing only installed dependencies, never consumer data.
-  await rm(join(consumer,'node_modules'),{recursive:true,force:true});
+  // Exercise npm replacement in place; preserve consumer files and installed tree.
   run(['install','--offline','--ignore-scripts','--no-audit','--no-fund','--package-lock=false',artifact.path],consumer);
+  const installed=JSON.parse(await readFile(join(consumer,'node_modules','@governancecommons','observatory-core','package.json'),'utf8'));
+  assert.equal(installed.version,artifact.version);
+  assert.equal(installed.private,true);
+  if(installed.bin?.observatory){
+   assert.equal(execFileSync(process.execPath,[join(consumer,'node_modules','@governancecommons','observatory-core',installed.bin.observatory),'--version'],{cwd:consumer,encoding:'utf8'}).trim(),artifact.version);
+  }
  };
  const packageDir=join(consumer,'node_modules','@governancecommons','observatory-core');
  const exercise=join(consumer,'exercise.mjs');
@@ -55,12 +62,12 @@ try{
  const cli=join(packageDir,'src','cli.mjs');
  assert.match(execFileSync(process.execPath,[cli,'--help'],{cwd:consumer,encoding:'utf8'}),/Observatory CLI/);
  await install(old);exerciseRun('verify');
- // Restore the closed backup into a separate working directory.
+ // Restore the closed backup into the isolated consumer directory.
  await install(a);
  for(const name of ['evidence.sqlite','evidence.sqlite-wal','evidence.sqlite-shm','news.json']){
   await rm(join(consumer,name),{force:true});
   try{await cp(join(backup,name),join(consumer,name));}catch(e){if(e.code!=='ENOENT')throw e;}
  }
  exerciseRun('verify');
- console.log(JSON.stringify({candidateSha256:a.hash,baselineSha256:old.hash,reproducible:true,upgrade:true,rollback:true,restore:true},null,2));
+ console.log(JSON.stringify({candidateVersion:a.version,baselineVersion:old.version,candidateSha256:a.hash,baselineSha256:old.hash,reproducible:true,upgrade:true,rollback:true,restore:true},null,2));
 }finally{await rm(dir,{recursive:true,force:true});}

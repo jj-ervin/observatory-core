@@ -13,7 +13,7 @@ async function workspace(fn){await mkdir(scratch,{recursive:true});const dir=awa
 const time='2026-01-01T00:00:00Z';
 test('CLI help, version, usage errors and no store side effects',async()=>workspace(async dir=>{
  const help=run('--help');assert.equal(help.status,0);assert.match(help.stdout,/discovery collect/);
- const version=run('--version');assert.equal(version.status,0);assert.match(version.stdout,/^\d+\.\d+\.\d+\s*$/);
+ const version=run('--version');assert.equal(version.status,0);assert.equal(version.stdout.trim(),JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version);
  const store=join(dir,'missing.json');
  for(const args of [['unknown','command'],['discovery','list'],['discovery','list','--store',store,'--store',store],['discovery','list','--store',store,'--status','bad'],['evidence','list','--store',store,'--limit','0']]){
   const r=run(...args);assert.equal(r.status,2,r.stderr);assert.equal(r.stdout,'');assert.match(r.stderr,/observatory:/);
