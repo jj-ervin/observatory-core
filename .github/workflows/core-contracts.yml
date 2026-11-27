@@ -22,7 +22,11 @@ jobs:
           python-version: '3.12'
       - name: Existing Node contract tests
         run: npm test
-      - name: Independent offline package fixture
+      - name: Build installable tarball
+        run: npm run build
+      - name: Independent offline package fixture against built tarball
+        env:
+          OC_PACKAGE_ARTIFACT: ${{ github.workspace }}/dist/observatory-core-1.0.0-rc.1.tgz
         run: npm run test:package
       - uses: actions/checkout@v4
         with:

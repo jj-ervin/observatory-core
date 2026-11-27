@@ -1,19 +1,21 @@
 {
-  "name": "@governancecommons/observatory-core",
+  "name": "observatory-core",
   "version": "1.0.0-rc.1",
   "private": true,
   "type": "module",
   "files": [
     "src",
     "schemas",
-    "scripts"
+    "scripts",
+    "COPYRIGHT"
   ],
   "scripts": {
     "test": "node --test",
     "validate:export": "node scripts/validate-export.mjs",
     "prepare:publication": "node scripts/prepare-publication.mjs",
     "test:package": "node scripts/verify-package.mjs",
-    "test:release": "node test-release/verify-release.mjs"
+    "test:release": "node test-release/verify-release.mjs",
+    "build": "node scripts/build-package.mjs"
   },
   "main": "./src/index.mjs",
   "engines": {
@@ -21,5 +23,6 @@
   },
   "bin": {
     "observatory": "./src/cli.mjs"
-  }
+  },
+  "license": "UNLICENSED"
 }

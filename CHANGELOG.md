@@ -4,6 +4,8 @@ Entries describe repository changes, not inferred package releases. The package 
 
 ## 1.0.0-rc.1 — candidate preparation (unpublished)
 
+- Maintainer-approved Osprey Strategic Holdings LLC ownership and proprietary notices, with private distribution and package inclusion verification.
+
 - Structured scholarly metadata and compatibility (#44); publication invariants (#45).
 - SDK entry point, package fixture and Windows/Linux checks (#46–#47); SDK-backed CLI (#48).
 - Reproducibility, offline replacement, rollback and backup rehearsal (#49).
