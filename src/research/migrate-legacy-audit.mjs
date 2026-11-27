@@ -4,7 +4,7 @@
  */
 import {DatabaseSync} from "node:sqlite";
 import {resolve} from "node:path";
-import {preparePrivateSQLite,protectSQLiteSidecars} from "../core/sqlite-permissions.mjs";
+import {preparePrivateSQLite} from "../core/sqlite-permissions.mjs";
 import {GENESIS,digest} from "./audit-chain.mjs";
 export function migrateLegacyResearchAudit(filePath,{backupConfirmed=false}={}){
  if(typeof filePath!=="string"||!filePath.trim()||backupConfirmed!==true)throw new TypeError("file path and confirmed backup required");
@@ -35,7 +35,6 @@ export function migrateLegacyResearchAudit(filePath,{backupConfirmed=false}={}){
    db.exec("ALTER TABLE research_access_audit ADD COLUMN entry_hash TEXT");
    const update=db.prepare("UPDATE research_access_audit SET previous_hash=?,entry_hash=? WHERE sequence=?");
    for(const row of updates)update.run(row.previousHash,row.entryHash,row.sequence);
-   protectSQLiteSidecars(path);
    db.exec("COMMIT");
    return Object.freeze({migrated:true,count:rows.length,headHash:previousHash});
   }catch(error){db.exec("ROLLBACK");throw error;}

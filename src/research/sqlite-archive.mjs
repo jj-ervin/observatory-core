@@ -3,7 +3,7 @@
  * Independent of evidence record schemas; capture/source refs must be checked by caller.
  */
 import {DatabaseSync} from "node:sqlite";
-import {preparePrivateSQLite,protectSQLiteSidecars} from "../core/sqlite-permissions.mjs";
+import {preparePrivateSQLite} from "../core/sqlite-permissions.mjs";
 import {mkdir} from "node:fs/promises";
 import {resolve,dirname} from "node:path";
 import {makeResearchDocument,makeResearchPassage,makeResearchCitation} from "./references.mjs";
@@ -22,7 +22,6 @@ export class SQLiteResearchArchive {
    db.exec("PRAGMA synchronous=FULL");
    db.exec("CREATE TABLE IF NOT EXISTS research_documents (id TEXT PRIMARY KEY, descriptor TEXT NOT NULL, content TEXT NOT NULL)");
    db.exec("CREATE VIRTUAL TABLE IF NOT EXISTS research_fts USING fts5(document_id UNINDEXED, content, tokenize='unicode61')");
-   protectSQLiteSidecars(path);
    return new SQLiteResearchArchive(db);
   }catch(error){db.close();throw error;}
  }

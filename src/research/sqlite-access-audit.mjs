@@ -4,7 +4,7 @@
  * Audit sink is synchronous so governed tools can fail closed.
  */
 import {DatabaseSync} from "node:sqlite";
-import {preparePrivateSQLite,protectSQLiteSidecars} from "../core/sqlite-permissions.mjs";
+import {preparePrivateSQLite} from "../core/sqlite-permissions.mjs";
 import {mkdir} from "node:fs/promises";
 import {dirname,resolve} from "node:path";
 import {GENESIS,digest} from "./audit-chain.mjs";
@@ -24,7 +24,6 @@ export class SQLiteResearchAccessAudit {
    db.exec("CREATE TABLE IF NOT EXISTS research_access_audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL, subject TEXT NOT NULL, document_id TEXT NOT NULL, action TEXT NOT NULL, allowed INTEGER NOT NULL CHECK(allowed IN (0,1)), previous_hash TEXT NOT NULL, entry_hash TEXT NOT NULL)");
    const cols=db.prepare("PRAGMA table_info(research_access_audit)").all().map(x=>x.name);
    if(!cols.includes("entry_hash")||!cols.includes("previous_hash"))throw new Error("legacy audit database requires explicit migration");
-   protectSQLiteSidecars(path);
    return new SQLiteResearchAccessAudit(db);
   }catch(error){db.close();throw error;}
  }

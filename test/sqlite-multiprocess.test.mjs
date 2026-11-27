@@ -13,7 +13,7 @@ const run=(path,prefix,count)=>new Promise((resolve,reject)=>{
  let stderr="";
  child.stderr.on("data",d=>stderr+=d);
  child.on("error",reject);
- child.on("close",code=>code===0?resolve():reject(new Error("worker exit "+code+": "+stderr)));
+ child.on("close",(code,signal)=>code===0?resolve():reject(new Error("worker exit "+code+" signal "+signal+": "+stderr)));
 });
 test("separate processes commit distinct records without lost updates", {timeout:60000}, async()=>{
  const dir=await mkdtemp(join(tmpdir(),"oc06-"));
@@ -21,7 +21,8 @@ test("separate processes commit distinct records without lost updates", {timeout
  try {
   // Initialize schema before starting competing workers.
   (await SQLiteEvidenceStore.open(path)).close();
-  await Promise.all([run(path,"alpha",12),run(path,"beta",12),run(path,"gamma",12)]);
+  const results=await Promise.allSettled([run(path,"alpha",12),run(path,"beta",12),run(path,"gamma",12)]);
+  for(const result of results)if(result.status==="rejected")throw result.reason;
   const db=await SQLiteEvidenceStore.open(path);
   try {
    assert.equal(db.query({limit:100}).total,36);

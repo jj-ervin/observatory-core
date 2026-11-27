@@ -1,8 +1,15 @@
 // Local trusted-directory boundary. Never change process-wide umask.
 // Existing databases must be quiescent when migrating from insecure permissions.
-import {openSync,closeSync,fstatSync,fchmodSync,constants} from 'node:fs';
+import {openSync,closeSync,fstatSync,fchmodSync,lstatSync,constants} from 'node:fs';
 
 function protect(path,{create=false,optional=false}={}){
+ // Opening and closing a second descriptor for an already-open SQLite file
+ // can release process-associated POSIX locks. Never do so for secure files.
+ try{
+  const stat=lstatSync(path);
+  if(!stat.isFile()||stat.nlink!==1||stat.uid!==process.getuid())throw new Error('SQLite file must be a regular, singly linked owner-controlled file');
+  if((stat.mode&0o7777)===0o600)return;
+ }catch(error){if(error.code!=='ENOENT')throw error;if(optional)return;if(!create)throw error;}
  let fd;
  const flags=constants.O_RDWR|constants.O_NOFOLLOW|constants.O_NONBLOCK;
  try{
