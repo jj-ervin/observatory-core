@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
@@ -11,16 +11,18 @@ if(!npm)throw new Error('Run through npm run test:package');
 function run(args,cwd){return execFileSync(process.execPath,[npm,...args],{cwd,encoding:'utf8',env:{...process.env,npm_config_audit:'false',npm_config_fund:'false'}});}
 try{
   const [packed]=JSON.parse(run(['pack','--json','--pack-destination',dir],root));
+  const artifact=process.env.OC_PACKAGE_ARTIFACT||join(dir,packed.filename);
+  if(process.env.OC_PACKAGE_ARTIFACT)assert.deepEqual(await readFile(artifact),await readFile(join(dir,packed.filename)),'build artifact differs from verified pack');
   assert.ok(packed.files.some(f=>f.path==='schemas/core/0.1.0/records.schema.json'));
   for(const name of ['LICENSE','COPYRIGHT'])assert.ok(packed.files.some(f=>f.path===name),name+' must be included');
   assert.ok(!packed.files.some(f=>/^(test|tests|\.scratch)\//.test(f.path)));
   const consumer=join(dir,'consumer');await mkdir(consumer);
   await writeFile(join(consumer,'package.json'),JSON.stringify({name:'independent-research-fixture',private:true,type:'module'}));
-  run(['install','--offline','--ignore-scripts','--no-audit','--no-fund','--package-lock=false',join(dir,packed.filename)],consumer);
+  run(['install','--offline','--ignore-scripts','--no-audit','--no-fund','--package-lock=false',artifact],consumer);
   await writeFile(join(consumer,'exercise.mjs'), [
     "import assert from 'node:assert/strict';",
-    "import {InMemoryEvidenceStore,SQLiteEvidenceStore,NewsroomDiscovery,preparePublication,validatePublication,sha256,RESEARCH_CONTRACT_VERSION} from '@governancecommons/observatory-core';",
-    "import {NewsroomDiscovery as LegacyDiscovery} from '@governancecommons/observatory-core/src/discovery/newsroom.mjs';",
+    "import {InMemoryEvidenceStore,SQLiteEvidenceStore,NewsroomDiscovery,preparePublication,validatePublication,sha256,RESEARCH_CONTRACT_VERSION} from 'observatory-core';",
+    "import {NewsroomDiscovery as LegacyDiscovery} from 'observatory-core/src/discovery/newsroom.mjs';",
     "assert.equal(LegacyDiscovery,NewsroomDiscovery);assert.equal(RESEARCH_CONTRACT_VERSION,'oc.research.v1');",
     "const time='2026-01-01T00:00:00Z';const base=(recordType,id)=>({schemaVersion:'0.1.0',recordType,id,version:1,createdAt:time,producer:'independent-fixture'});",
     "const records=[{...base('source','s'),locator:'https://example.org/source',sourceType:'web',displayName:'Synthetic'}, {...base('capture','c'),sourceRef:'source:s@1',capturedAt:time,contentDigest:'sha256:'+sha256(Buffer.from('fixture')),mediaType:'text/plain',retrievalMethod:'http'}, {...base('evidence','e'),captureRefs:['capture:c@1'],assertion:'Synthetic',method:'extract',limitations:'Test only'}];",
@@ -32,7 +34,7 @@ try{
     "const candidate=preparePublication(input);assert.deepEqual(validatePublication(candidate.manifest,candidate.recordsBytes),[]);assert.deepEqual(candidate.recordsBytes,preparePublication(input).recordsBytes);"
   ].join('\n'));
   execFileSync(process.execPath,['exercise.mjs'],{cwd:consumer,stdio:'inherit'});
-  const installed=join(consumer,'node_modules','@governancecommons','observatory-core','src','cli.mjs');
+  const installed=join(consumer,'node_modules','observatory-core','src','cli.mjs');
   const help=execFileSync(process.execPath,[installed,'--help'],{cwd:consumer,encoding:'utf8'});
   assert.match(help,/Observatory CLI/);
   const shim=join(consumer,'node_modules','.bin',process.platform==='win32'?'observatory.cmd':'observatory');
