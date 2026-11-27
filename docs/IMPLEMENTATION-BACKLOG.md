@@ -1,0 +1,19 @@
+# OC-PD-001 — Implementation backlog
+
+These product work items map to approved milestones. Existing issues and historical OC notes retain execution detail. Status does not imply release.
+
+| Work item | Status | Milestone/asset | Done when |
+| --- | --- | --- | --- |
+| OC-SM-001 structured scholarly metadata, [issue #42](https://github.com/jj-ervin/observatory-core/issues/42) | open | M01/A01 | Supplied DOI, ordered authors/IDs, date/precision, venue, abstract, type, access and retraction metadata retained; unknowns remain unknown; duplicate merge, persistence and backward compatibility tests pass; ProPro/Gen-B field contract documented |
+| Publication invariants in [PR #3](https://github.com/jj-ervin/observatory-core/pull/3) | open | M01–M02/A01 | Evaluate on current main; preserve GC v1; merge or supersede through review |
+| Readiness overlap in [PR #40](https://github.com/jj-ervin/observatory-core/pull/40) | open | M02/A01 | Refresh stale version/source claims; avoid competing README authority |
+| Stable SDK imports and non-GC package fixture | planned | M02–M04/A01 | Document/test public paths, errors, pinned private install and provenance round trip |
+| Egress, access, storage and recovery assurance | open | M03/A01 | OC-08C and OC-06 gates, threat/retention/rights review, failure evidence and environment matrix |
+| License, ownership, package identity and distribution | open | M04/A01 | Maintainer records rights/publisher/namespace authorization; artifact verified without premature version change |
+| SDK-backed CLI | planned | M05/A02 | Commands, help/errors, parity, offline fixture and install tests pass |
+| Private SDK/CLI release assurance | planned | M06/A01–A02 | CRA, applicable GC conformance, pinned artifacts, release criteria and authorization complete |
+| Research API | planned | M07/A03 | Asset register API criteria met in separate scope |
+| MCP server | planned | M08/A04 | Asset register MCP criteria met in separate scope |
+| Container | planned | M09/A05 | Asset register container criteria met in separate scope |
+
+Merged baselines verified by GitHub PR state: Observatory Core [#41](https://github.com/jj-ervin/observatory-core/pull/41), Project Portal [#11](https://github.com/jj-ervin/project-portal/pull/11), Gen-B [#4](https://github.com/jj-ervin/gen-b/pull/4) and [#5](https://github.com/jj-ervin/gen-b/pull/5). Downstream merges are integration activity, not release readiness. Separate local OpenAlex commit `82668ac` is not in merged main and is excluded here.
