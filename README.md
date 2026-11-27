@@ -45,3 +45,7 @@ python -m unittest discover -s tests -p test_core_schema.py
 `npm run validate:export -- manifest.json records.json` validates a legacy GC export. `npm run prepare:publication` runs its legacy candidate utility. Neither grants release authority.
 
 Consumers own identity, access policy, editorial approval, source rights, model credentials, deployment and public release. Core preserves evidence, provenance and exact candidate bytes without asserting truth or authorization. Never commit private Dossier or Roster data or treat documentation-only records as benchmark evidence.
+
+## Observatory API candidate
+
+See [API usage](docs/API.md) for the initial authenticated loopback research service. Private testing only; no remote or production deployment approval.

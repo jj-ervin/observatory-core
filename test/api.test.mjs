@@ -1,0 +1,42 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,rm} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {join} from 'node:path';
+import {randomBytes} from 'node:crypto';
+import {SQLiteResearchArchive} from '../src/index.mjs';
+import {SQLiteResearchAccessAudit} from '../src/research/sqlite-access-audit.mjs';
+import {createObservatoryApi} from '../src/api/server.mjs';
+test('HTTP API authenticates, scopes, audits, validates, revokes and persists',async()=>{
+ const scratch=fileURLToPath(new URL('../.scratch/',import.meta.url));await mkdir(scratch,{recursive:true});
+ const dir=await mkdtemp(join(scratch,'api-'));
+ const archive=await SQLiteResearchArchive.open(join(dir,'archive.sqlite'));
+ let audit=await SQLiteResearchAccessAudit.open(join(dir,'audit.sqlite'));
+ const visible=archive.put({sourceRef:'source:s@1',captureRef:'capture:c@1',content:'basketball public fixture',mediaType:'text/plain'});
+ const hidden=archive.put({sourceRef:'source:x@1',captureRef:'capture:y@1',content:'basketball restricted fixture',mediaType:'text/plain'});
+ const token=randomBytes(32).toString('base64url'),other=randomBytes(32).toString('base64url');
+ let outage=false;
+ const api=createObservatoryApi({archive,audit:{record(x){if(outage)throw Error('secret internal error');return audit.record(x);}},principals:[{subject:'tester',token,documentIds:[visible.id],actions:['search','read','verify']},{subject:'reader',token:other,documentIds:[hidden.id],actions:['read']}]});
+ try{
+  const address=await api.listen();assert.equal(address.address,'127.0.0.1');
+  const url='http://127.0.0.1:'+address.port;
+  const invoke=(operation,args)=>({version:'oc.research.v1',operation,arguments:args});
+  const post=(body,key=token,headers={})=>fetch(url+'/v1/research/invoke',{method:'POST',headers:{authorization:'Bearer '+key,'content-type':'application/json',...headers},body:typeof body==='string'?body:JSON.stringify(body)});
+  assert.equal((await fetch(url+'/healthz')).status,200);
+  assert.equal((await post(invoke('getDocument',{documentId:visible.id}),'invalid')).status,401);
+  assert.equal((await post('{invalid')).status,400);
+  assert.equal((await post('x'.repeat(17000))).status,413);
+  assert.equal((await post('{}',token,{'content-type':'text/plain'})).status,415);
+  assert.equal((await post({...invoke('getDocument',{documentId:hidden.id}),subject:'reader'})).status,400);
+  const result=await post(invoke('searchEvidence',{query:'basketball'}));assert.equal(result.status,200);
+  const rows=(await result.json()).result.results;assert.equal(rows.length,1);assert.equal(rows[0].document.id,visible.id);
+  assert.equal((await post(invoke('getDocument',{documentId:hidden.id}))).status,403);
+  assert.equal((await post(invoke('getDocument',{documentId:hidden.id}),other)).status,200);
+  const denied=await post(invoke('verifyCitation',{documentId:hidden.id,start:0,end:10,quotedText:'basketball'}),other);assert.equal(denied.status,403);
+  const verified=await post(invoke('verifyCitation',{documentId:visible.id,start:0,end:10,quotedText:'basketball'}));assert.equal(verified.status,200);
+  outage=true;const failure=await post(invoke('getDocument',{documentId:visible.id}));assert.equal(failure.status,403);assert.ok(!(await failure.text()).includes('secret internal'));
+  outage=false;api.revoke('tester');assert.equal((await post(invoke('getDocument',{documentId:visible.id}))).status,401);
+  audit.close();audit=await SQLiteResearchAccessAudit.open(join(dir,'audit.sqlite'));
+  const entries=audit.list();assert.ok(entries.some(e=>e.subject==='tester'&&e.documentId===hidden.id&&!e.allowed));assert.ok(entries.some(e=>e.subject==='reader'&&e.documentId===hidden.id&&e.allowed));assert.ok(entries.every(e=>!JSON.stringify(e).includes(token)));
+ }finally{await api.close();audit.close();archive.close();await rm(dir,{recursive:true,force:true});}
+});
