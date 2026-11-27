@@ -25,3 +25,17 @@ test("rejects reserved, local, and non-public address answers",async()=>{
   await assert.rejects(transport("https://example.org/rss",{redirect:"error"}),/unsafe DNS/,address);
  }
 });
+
+test("rejects ambiguous hosts and special-use IPv6 forms",()=>{
+ for(const host of ["*.example.org","example.org.","example.org:443","127.0.0.1","localhost","-bad.example.org","example..org"]){assert.throws(()=>createSecureFeedTransport({allowedHosts:[host],approvedAddresses:{[host]:["93.184.216.34"]}}),/allowedHosts/);}
+ for(const address of ["0:0:0:0:0:0:0:1","0:0:0:0:0:ffff:7f00:1","::ffff:7f00:1","::192.0.2.1","64:ff9b::7f00:1","2002:7f00:1::","3fff::1","fec0::1"]){assert.throws(()=>createSecureFeedTransport({allowedHosts:["example.org"],approvedAddresses:{"example.org":[address]}}),/public approvedAddresses/,address);}
+ assert.doesNotThrow(()=>createSecureFeedTransport({allowedHosts:["example.org"],approvedAddresses:{"example.org":["2606:4700::1111"]}}));
+});
+test("pins are copied and inconsistent DNS address families rejected",async()=>{
+ const ips={"example.org":["93.184.216.34"]};
+ const transport=createSecureFeedTransport({allowedHosts:["example.org"],approvedAddresses:ips,resolveHost:async()=>[{address:"1.1.1.1",family:4}]});
+ ips["example.org"].push("1.1.1.1");
+ await assert.rejects(transport("https://example.org/rss",{redirect:"error"}),/unsafe DNS/);
+ const wrong=createSecureFeedTransport({allowedHosts:["example.org"],approvedAddresses:ips,resolveHost:async()=>[{address:"93.184.216.34",family:6}]});
+ await assert.rejects(wrong("https://example.org/rss",{redirect:"error"}),/unsafe DNS/);
+});
