@@ -12,6 +12,7 @@ function run(args,cwd){return execFileSync(process.execPath,[npm,...args],{cwd,e
 try{
   const [packed]=JSON.parse(run(['pack','--json','--pack-destination',dir],root));
   assert.ok(packed.files.some(f=>f.path==='schemas/core/0.1.0/records.schema.json'));
+  for(const name of ['LICENSE','COPYRIGHT'])assert.ok(packed.files.some(f=>f.path===name),name+' must be included');
   assert.ok(!packed.files.some(f=>/^(test|tests|\.scratch)\//.test(f.path)));
   const consumer=join(dir,'consumer');await mkdir(consumer);
   await writeFile(join(consumer,'package.json'),JSON.stringify({name:'independent-research-fixture',private:true,type:'module'}));

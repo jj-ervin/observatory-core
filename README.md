@@ -4,6 +4,10 @@ Asset-oriented research and evidence infrastructure. The Observatory Core SDK is
 
 **Status:** private Node ESM package `@governancecommons/observatory-core` at `1.0.0-rc.1` (unpublished release candidate). Source modules and tests exist, but no SDK or Observatory CLI v1.0.0 release is claimed. API, MCP and container assets are planned. Existing GC publication scripts remain legacy utilities. The SDK-backed Observatory CLI candidate is documented below.
 
+## Ownership and distribution
+
+Copyright (c) 2026 Osprey Strategic Holdings LLC. All rights reserved. Proprietary software; see [LICENSE](LICENSE). The approved release audience is private SDK/CLI distribution to authorized users. Public source visibility does not grant an open-source license. No registry publication or final release is authorized by this notice.
+
 ## Product baseline
 
 - [Charter](docs/PRODUCT-CHARTER.md), [asset register](docs/ASSET-REGISTER.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md)
