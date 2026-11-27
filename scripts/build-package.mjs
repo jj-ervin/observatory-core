@@ -14,7 +14,7 @@ try{
  assert.equal(pkg.private,true);assert.equal(pkg.license,'UNLICENSED');
  const [packed]=JSON.parse(execFileSync(process.execPath,[npm,'pack','--ignore-scripts','--json','--pack-destination',stage],{cwd:root,encoding:'utf8'}));
  assert.equal(packed.name,pkg.name);assert.equal(packed.version,pkg.version);
- for(const file of ['LICENSE','COPYRIGHT','src/index.mjs','src/cli.mjs','schemas/core/0.1.0/records.schema.json'])assert.ok(packed.files.some(f=>f.path===file),file+' missing');
+ for(const file of ['LICENSE','COPYRIGHT','src/index.mjs','src/cli.mjs','src/api/start.mjs','schemas/api/v1/openapi.json','schemas/core/0.1.0/records.schema.json'])assert.ok(packed.files.some(f=>f.path===file),file+' missing');
  assert.ok(!packed.files.some(f=>/^(test|tests|\.scratch|dist)\//.test(f.path)));
  const bytes=await readFile(join(stage,packed.filename));
  assert.equal(packed.integrity,'sha512-'+createHash('sha512').update(bytes).digest('base64'));

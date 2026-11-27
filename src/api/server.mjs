@@ -5,6 +5,7 @@ import {createGovernedResearchTools} from '../research/governed-tools.mjs';
 import {createResearchJsonTransport} from '../research/json-transport.mjs';
 import {createResearchAuditCallback} from '../research/sqlite-access-audit.mjs';
 
+import {routes,permissions} from './operations.mjs';
 const digest=s=>createHash('sha256').update(s).digest();
 const id=/^doc-[a-f0-9]{64}$/;
 const scopes=['search','read','verify'];
@@ -15,12 +16,15 @@ function send(res,status,body){
  res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Length':Buffer.byteLength(body)});
  res.end(body);
 }
-export function createObservatoryApi({archive,audit,principals}={}){
+export function createObservatoryApi({archive,audit,principals,workspace,operationAudit}={}){
  if(!archive||typeof archive.get!=='function'||typeof archive.resolveCitation!=='function'||!audit||typeof audit.record!=='function')throw new TypeError('archive and durable audit required');
  if(!Array.isArray(principals)||!principals.length||principals.length>100)throw new TypeError('bounded principals required');
+ if(workspace&&(!workspace.discovery||!workspace.evidence||!operationAudit||typeof operationAudit.record!=='function'))throw new TypeError('workspace stores and operation audit required');
  const entries=principals.map(p=>{
   if(typeof p.subject!=='string'||!p.subject.trim()||p.subject.length>256||typeof p.token!=='string'||! /^[A-Za-z0-9_-]{43,128}$/.test(p.token)||!Array.isArray(p.documentIds)||p.documentIds.length>100||p.documentIds.some(x=>typeof x!=='string'||!id.test(x))||new Set(p.documentIds).size!==p.documentIds.length||!Array.isArray(p.actions)||p.actions.some(x=>!scopes.includes(x)))throw new TypeError('invalid principal');
-  return {subject:p.subject,hash:digest(p.token),documents:[...p.documentIds],actions:new Set(p.actions),active:true};
+  const grants=p.permissions??[];
+  if(!Array.isArray(grants)||grants.some(g=>!permissions.includes(g))||(!workspace&&grants.length))throw new TypeError('invalid workspace permissions');
+  return {subject:p.subject,hash:digest(p.token),documents:[...p.documentIds],actions:new Set(p.actions),grants:new Set(grants),active:true};
  });
  if(new Set(entries.map(p=>p.subject)).size!==entries.length||new Set(entries.map(p=>p.hash.toString('hex'))).size!==entries.length)throw new TypeError('duplicate principal');
  const transport=createResearchJsonTransport(p=>createResearchIntegration(createGovernedResearchTools(archive,{
@@ -31,7 +35,8 @@ export function createObservatoryApi({archive,audit,principals}={}){
  const server=createServer({requestTimeout:10000,headersTimeout:5000,keepAliveTimeout:1000,maxHeaderSize:8192},(req,res)=>{
   // Only exact paths; no URL parameters, cookies, forwarded identity or CORS.
   if(req.method==='GET'&&req.url==='/healthz'){send(res,200,'{"status":"ok","apiVersion":"v1"}');return;}
-  if(req.url!=='/v1/research/invoke'){fail(res,404,'NOT_FOUND');return;}
+  const route=workspace&&Object.hasOwn(routes,req.url)?routes[req.url]:null;
+  if(req.url!=='/v1/research/invoke'&&!route){fail(res,404,'NOT_FOUND');return;}
   if(req.method!=='POST'){res.setHeader('Allow','POST');fail(res,405,'METHOD_NOT_ALLOWED');return;}
   const auth=req.headers.authorization;
   const match=typeof auth==='string'&&/^Bearer ([A-Za-z0-9_-]{43,128})$/.exec(auth);
@@ -52,14 +57,26 @@ export function createObservatoryApi({archive,audit,principals}={}){
    if(total>MAX){done=true;clearTimeout(timer);res.setHeader('Connection','close');fail(res,413,'REQUEST_TOO_LARGE');return;}
    chunks.push(chunk);
   });
-  req.on('end',()=>{
+  req.on('end',async()=>{
    if(done)return;
    done=true;clearTimeout(timer);
    if(!principal.active){fail(res,401,'UNAUTHENTICATED');return;}
    try{
     const body=new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks));
-    const result=transport.handle(body,principal);
-    send(res,result.status,result.body);
+    if(!route){const result=transport.handle(body,principal);send(res,result.status,result.body);return;}
+    const allowed=principal.active&&principal.grants.has(route.permission);
+    try{
+     const receipt=operationAudit.record({subject:principal.subject,operation:req.url,allowed});
+     if(receipt&&typeof receipt.then==='function'){Promise.resolve(receipt).catch(()=>{});throw Error('async audit');}
+     if(!Number.isSafeInteger(receipt)||receipt<1)throw Error('audit unavailable');
+    }catch{fail(res,503,'AUDIT_UNAVAILABLE');return;}
+    if(!allowed){fail(res,403,'FORBIDDEN');return;}
+    let input;try{input=JSON.parse(body);}catch{fail(res,400,'INVALID_JSON');return;}
+    if(!route.valid(input)){fail(res,400,'INVALID_REQUEST');return;}
+    let result;try{result=await route.run({...workspace,archive},input);}catch{fail(res,422,'OPERATION_FAILED');return;}
+    const encoded=JSON.stringify({ok:true,result});
+    if(Buffer.byteLength(encoded)>256*1024){fail(res,422,'RESPONSE_TOO_LARGE');return;}
+    send(res,200,encoded);
    }catch{fail(res,400,'INVALID_REQUEST');}
   });
  });
