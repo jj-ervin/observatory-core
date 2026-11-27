@@ -20,8 +20,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p .scratch/container
-          docker pull node:24-bookworm-slim
-          base="$(docker image inspect node:24-bookworm-slim --format '{{index .RepoDigests 0}}')"
+          docker pull node:24-alpine
+          base="$(docker image inspect node:24-alpine --format '{{index .RepoDigests 0}}')"
           case "$base" in *@sha256:*) ;; *) exit 1 ;; esac
           printf '%s\n' "$base" | tee .scratch/container/base-digest.txt
           epoch="$(git show -s --format=%ct HEAD)"

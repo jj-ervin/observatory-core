@@ -6,6 +6,8 @@ WORKDIR /opt/observatory
 COPY --chown=0:0 package.json LICENSE COPYRIGHT ./
 COPY --chown=0:0 src ./src
 COPY --chown=0:0 schemas ./schemas
+# The application uses only Node built-ins; npm, npx and Yarn are not runtime requirements.
+RUN apk upgrade --no-cache && rm -rf /usr/local/lib/node_modules /opt/yarn* /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 RUN mkdir -p /data /run/observatory && chown 1000:1000 /data && chmod 0700 /data && chmod -R a-w /opt/observatory
 ENV NODE_ENV=production OBSERVATORY_API_CONFIG=/run/observatory/api.json OBSERVATORY_MCP_CONFIG=/run/observatory/mcp.json
 LABEL org.opencontainers.image.title="Observatory Core" org.opencontainers.image.version="1.2.0" org.opencontainers.image.vendor="Osprey Strategic Holdings LLC"

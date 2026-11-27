@@ -4,11 +4,11 @@ Private local Linux container candidate, wrapping the existing SDK, CLI, API and
 
 ## Build and identity
 
-Resolve an approved Node 24 Debian slim base to an immutable digest, record it, and build with that digest. CI records the resolved base and compares filesystem layer digests across two builds. Image ID equality is separately reported; this is same-runner evidence, not cross-platform reproducibility. Reuse the recorded base digest when rebuilding; the floating tag is only a discovery input.
+Resolve an approved Node 24 Alpine base to an immutable digest, record it, and build with that digest. CI records the resolved base and compares filesystem layer digests across two builds. Image ID equality is separately reported; this is same-runner evidence, not cross-platform reproducibility. Reuse the recorded base digest when rebuilding; the floating tag is only a discovery input.
 
 ```sh
-docker pull node:24-bookworm-slim
-BASE=$(docker image inspect node:24-bookworm-slim --format '{{index .RepoDigests 0}}')
+docker pull node:24-alpine
+BASE=$(docker image inspect node:24-alpine --format '{{index .RepoDigests 0}}')
 docker build --build-arg NODE_BASE="$BASE" -t observatory-private:1.2.0 .
 ```
 
@@ -23,3 +23,7 @@ For CLI or MCP use docker run --rm with the same hardened flags and mounted data
 Stop writers cleanly before backup; preserve all data files and sidecars. Retain exact previous image ID and config, and a quiescent backup; restore into a separate owner-controlled directory before rollback. Start the retained image against restored data and run an authenticated smoke request. CI tests restart and restoration with the same candidate, not cross-version container rollback. The SDK package fixture separately verifies versioned package rollback.
 
 Container CI builds the pinned-base image, checks non-root/read-only/offline operation, auth denial, persistence and restoration, CLI smoke and scans HIGH/CRITICAL vulnerabilities (including unfixed). A failing scan is a release blocker requiring documented disposition, not an ignored warning. No image is uploaded from public repository CI. Private image retention, independent security review, actual host interoperability and production deployment remain separate. Windows Docker Desktop Linux containers and ARM64 have not been verified. Use authorized nonsensitive fixtures only.
+
+## Base-image remediation
+
+Initial Debian candidate built and passed runtime/recovery checks and same-runner image identity comparison, but Trivy run 45992596846 reported 38 HIGH and 1 CRITICAL OS findings plus 6 HIGH findings in bundled Node packages. Switch to Alpine, apply available OS updates and remove unused npm/npx/Yarn tooling from the final runtime. Keep Node itself and all application-required dependencies. No vulnerability exclusions or severity downgrade. Re-run the full scan; passing is not assumed. OS updates introduce repository-state dependence beyond the base digest; reproducibility is scoped to the recorded build environment, and immutable final image retention is required for exact redeployment.
