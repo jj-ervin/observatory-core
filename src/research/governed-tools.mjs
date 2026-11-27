@@ -13,10 +13,19 @@ export function createGovernedResearchTools(archive,{candidateDocumentIds,author
   if(typeof id!=="string"||!idPattern.test(id))throw new TypeError("invalid documentId");
   let allowed=false;
   try{
-   if(candidates.has(id))allowed=authorize(Object.freeze({documentId:id,action}))===true;
+   if(candidates.has(id)){
+    const decision=authorize(Object.freeze({documentId:id,action}));
+    if(decision&&typeof decision.then==="function")Promise.resolve(decision).catch(()=>{});
+    allowed=decision===true;
+   }
   }catch{allowed=false;}
   // A failed audit must fail closed before any protected archive read.
-  audit(Object.freeze({documentId:id,action,allowed}));
+  const receipt=audit(Object.freeze({documentId:id,action,allowed}));
+  if(receipt&&typeof receipt.then==="function"){
+   Promise.resolve(receipt).catch(()=>{});
+   throw new TypeError("synchronous audit callback required");
+  }
+  if(receipt===false)throw new Error("audit rejected decision");
   if(!allowed){if(skipDenied)return false;throw new Error("research document unavailable");}
   return true;
  }

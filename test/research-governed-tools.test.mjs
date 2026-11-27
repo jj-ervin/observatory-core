@@ -28,3 +28,17 @@ test("governed research rechecks permissions and fails closed on audit failures"
   assert.throws(()=>auditFailure.getDocument({documentId:a.id}),/audit unavailable/);
  }finally{archive.close();await rm(dir,{recursive:true,force:true});}
 });
+
+test("async or explicitly rejected audit never permits archive access",()=>{
+ const id="doc-"+"a".repeat(64);let reads=0;
+ const archive={get(){reads++;return null;},resolveCitation(){reads++;}};
+ for(const audit of [async()=>{},async()=>{throw Error("audit unavailable");},()=>false]){
+  const tools=createGovernedResearchTools(archive,{candidateDocumentIds:[id],authorize:()=>true,audit});
+  assert.throws(()=>tools.getDocument({documentId:id}),/audit/);
+  assert.throws(()=>tools.searchEvidence({query:"x"}),/audit/);
+  assert.throws(()=>tools.verifyCitation({documentId:id,start:0,end:1,quotedText:"x"}),/audit/);
+ }
+ const tools=createGovernedResearchTools(archive,{candidateDocumentIds:[id],authorize:async()=>{throw Error("policy unavailable");},audit:()=>{}});
+ assert.throws(()=>tools.getDocument({documentId:id}),/unavailable/);
+ assert.equal(reads,0);
+});
