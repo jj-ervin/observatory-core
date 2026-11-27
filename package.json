@@ -12,7 +12,8 @@
     "test": "node --test",
     "validate:export": "node scripts/validate-export.mjs",
     "prepare:publication": "node scripts/prepare-publication.mjs",
-    "test:package": "node scripts/verify-package.mjs"
+    "test:package": "node scripts/verify-package.mjs",
+    "test:release": "node test-release/verify-release.mjs"
   },
   "main": "./src/index.mjs",
   "engines": {

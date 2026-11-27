@@ -24,6 +24,14 @@ jobs:
         run: npm test
       - name: Independent offline package fixture
         run: npm run test:package
+      - uses: actions/checkout@v4
+        with:
+          ref: eec77eb8f4c5e4d49e3647c22be36ce16ee2d6af
+          path: .scratch/release-baseline
+      - name: Reproducibility, upgrade, rollback and backup fixture
+        env:
+          OC_BASELINE_DIR: ${{ github.workspace }}/.scratch/release-baseline
+        run: npm run test:release
       - name: Install JSON Schema validator
         run: python -m pip install -r requirements-schema-test.txt
       - name: Domain-neutral JSON Schema conformance
