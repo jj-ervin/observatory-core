@@ -17,5 +17,8 @@
   "main": "./src/index.mjs",
   "engines": {
     "node": ">=24"
+  },
+  "bin": {
+    "observatory": "./src/cli.mjs"
   }
 }
