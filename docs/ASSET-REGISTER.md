@@ -8,6 +8,6 @@
 | OC-A02 Observatory CLI | Candidate implemented; CI pending | Pinned private CLI install; SDK-backed research/evidence commands with stable help/errors; offline fixture and SDK parity tests | `src/cli.mjs`, `test/cli.test.mjs`, `docs/CLI.md`; legacy scripts retained |
 | OC-A03 Observatory API | Workspace HTTP candidate; CI pending | Authenticated host context; bounded versioned SDK-backed operations; denial, audit, integration and threat tests | src/api/; schemas/api/v1/openapi.json; docs/API.md; private testing and production gates remain |
 | OC-A04 Observatory MCP | Local stdio candidate; CI pending | Versioned least-privilege SDK-backed tools; host auth/scope/audit; protocol and prompt-injection tests | src/mcp/; docs/MCP.md; installed subprocess fixture; host interoperability and independent review remain |
-| OC-A05 Observatory Container | Planned | Reproducible pinned image; non-root runtime; external secrets; health checks, scan and rollback proof; SDK-backed service | No Dockerfile or image evidence |
+| OC-A05 Observatory Container | Offline Linux candidate; CI pending | Reproducible pinned image; non-root runtime; external secrets; health checks, scan and rollback proof; SDK-backed service | Dockerfile; compose.yaml; scripts/verify-container.sh; docs/CONTAINER.md; image retention and review pending |
 
-All assets require documented ownership, rights and distribution decisions before release. A03–A05 are outside this objective's implementation scope.
+All assets require documented ownership, rights and distribution decisions before release. Each asset has a candidate implementation; verification and release decisions remain separate.

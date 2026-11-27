@@ -1,0 +1,24 @@
+services:
+  observatory:
+    image: ${OBSERVATORY_IMAGE:?Set the verified local image ID or tag}
+    pull_policy: never
+    command: ["api"]
+    network_mode: none
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: 1.0
+    stop_grace_period: 30s
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m
+    volumes:
+      - type: bind
+        source: ${OBSERVATORY_DATA:?Set owner-controlled data directory}
+        target: /data
+      - type: bind
+        source: ${OBSERVATORY_CONFIG:?Set private API JSON file}
+        target: /run/observatory/api.json
+        read_only: true

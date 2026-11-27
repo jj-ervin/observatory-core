@@ -1,0 +1,51 @@
+name: Observatory container
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Resolve immutable base and build twice
+        shell: bash
+        run: |
+          mkdir -p .scratch/container
+          docker pull node:24-bookworm-slim
+          base="$(docker image inspect node:24-bookworm-slim --format '{{index .RepoDigests 0}}')"
+          case "$base" in *@sha256:*) ;; *) exit 1 ;; esac
+          printf '%s\n' "$base" | tee .scratch/container/base-digest.txt
+          epoch="$(git show -s --format=%ct HEAD)"
+          for tag in a b; do
+            docker buildx build --load --provenance=false --sbom=false --build-arg NODE_BASE="$base" --build-arg SOURCE_DATE_EPOCH="$epoch" -t "observatory-private:$tag" .
+          done
+          a="$(docker image inspect observatory-private:a --format '{{.Id}}')"
+          b="$(docker image inspect observatory-private:b --format '{{.Id}}')"
+          printf 'Image IDs: %s %s\n' "$a" "$b"
+          # Compare filesystem layer digests; image metadata reproducibility separately reported.
+          test "$(docker image inspect observatory-private:a --format '{{json .RootFS.Layers}}')" = "$(docker image inspect observatory-private:b --format '{{json .RootFS.Layers}}')"
+          if [ "$a" = "$b" ]; then echo 'Image ID reproducibility: pass'; else echo 'Image ID reproducibility: differs'; fi
+      - name: Hardened runtime and recovery
+        run: bash scripts/verify-container.sh observatory-private:a
+      - name: Vulnerability scan
+        uses: aquasecurity/trivy-action@0.34.1
+        with:
+          image-ref: observatory-private:a
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: false
+      - name: Record local image identity
+        if: always()
+        run: |
+          docker image inspect observatory-private:a --format 'Image {{.Id}}; user {{.Config.User}}; layers {{json .RootFS.Layers}}' || true
+          echo 'No image pushed or uploaded from public repository.'

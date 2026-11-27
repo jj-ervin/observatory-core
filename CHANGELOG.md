@@ -2,6 +2,10 @@
 
 Entries describe repository changes, not inferred package releases. The package remains private. Release-candidate source versions do not imply publication.
 
+## Unreleased — OC-M09 container candidate
+
+- Offline non-root Docker image, hardened compose configuration, health check, external config/data mounts, runtime and restore verification and vulnerability scan. No registry publication.
+
 ## 1.2.0 — MCP private-testing candidate
 
 - Local stdio MCP 2025-11-25 adapter; host-scoped read-only research/evidence/discovery and candidate validation tools; durable audit and untrusted-data marking.
