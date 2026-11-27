@@ -1,6 +1,6 @@
 {
   "name": "observatory-core",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "files": [
@@ -16,7 +16,8 @@
     "test:package": "node scripts/verify-package.mjs",
     "test:release": "node test-release/verify-release.mjs",
     "build": "node scripts/build-package.mjs",
-    "api": "node src/api/start.mjs"
+    "api": "node src/api/start.mjs",
+    "mcp": "node src/mcp/start.mjs"
   },
   "main": "./src/index.mjs",
   "engines": {
@@ -24,7 +25,8 @@
   },
   "bin": {
     "observatory": "./src/cli.mjs",
-    "observatory-api": "./src/api/start.mjs"
+    "observatory-api": "./src/api/start.mjs",
+    "observatory-mcp": "./src/mcp/start.mjs"
   },
   "license": "UNLICENSED"
 }
