@@ -15,7 +15,8 @@
     "prepare:publication": "node scripts/prepare-publication.mjs",
     "test:package": "node scripts/verify-package.mjs",
     "test:release": "node test-release/verify-release.mjs",
-    "build": "node scripts/build-package.mjs"
+    "build": "node scripts/build-package.mjs",
+    "api": "node src/api/start.mjs"
   },
   "main": "./src/index.mjs",
   "engines": {
