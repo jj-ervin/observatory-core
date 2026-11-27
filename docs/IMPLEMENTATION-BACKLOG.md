@@ -4,9 +4,9 @@ These product work items map to approved milestones. Existing issues and histori
 
 | Work item | Status | Milestone/asset | Done when |
 | --- | --- | --- | --- |
-| OC-SM-001 structured scholarly metadata, [issue #42](https://github.com/jj-ervin/observatory-core/issues/42) | open | M01/A01 | Supplied DOI, ordered authors/IDs, date/precision, venue, abstract, type, access and retraction metadata retained; unknowns remain unknown; duplicate merge, persistence and backward compatibility tests pass; ProPro/Gen-B field contract documented |
-| Publication invariants in [PR #3](https://github.com/jj-ervin/observatory-core/pull/3) | open | M01–M02/A01 | Evaluate on current main; preserve GC v1; merge or supersede through review |
-| Readiness overlap in [PR #40](https://github.com/jj-ervin/observatory-core/pull/40) | open | M02/A01 | Refresh stale version/source claims; avoid competing README authority |
+| OC-SM-001 structured scholarly metadata, [issue #42](https://github.com/jj-ervin/observatory-core/issues/42) | merged; PR CI passed ([#44](https://github.com/jj-ervin/observatory-core/pull/44)) | M01/A01 | Supplied DOI, ordered authors/IDs, date/precision, venue, abstract, type, access and retraction metadata retained; unknowns remain unknown; duplicate merge, persistence and backward compatibility tests pass; ProPro/Gen-B field contract documented |
+| Publication invariants in [PR #3](https://github.com/jj-ervin/observatory-core/pull/3) | carried forward; candidate CI pending | M01–M02/A01 | Evaluate on current main; preserve GC v1; merge or supersede through review |
+| Readiness overlap in [PR #40](https://github.com/jj-ervin/observatory-core/pull/40) | supersession proposed | M02/A01 | Canonical README and release criteria from #43 plus retained external-consumer acceptance details; close old draft only after review |
 | Stable SDK imports and non-GC package fixture | planned | M02–M04/A01 | Document/test public paths, errors, pinned private install and provenance round trip |
 | Egress, access, storage and recovery assurance | open | M03/A01 | OC-08C and OC-06 gates, threat/retention/rights review, failure evidence and environment matrix |
 | License, ownership, package identity and distribution | open | M04/A01 | Maintainer records rights/publisher/namespace authorization; artifact verified without premature version change |

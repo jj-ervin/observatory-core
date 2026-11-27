@@ -15,3 +15,7 @@ Baseline: merged `origin/main` `2f3974d6123087f8ad69ec76705d76c773b61f7e`, revie
 No gate closes merely because a module or test exists. Open [PR #40](https://github.com/jj-ervin/observatory-core/pull/40) is an earlier readiness proposal with stale `0.1.0` text. Open [PR #3](https://github.com/jj-ervin/observatory-core/pull/3) has publication invariant tests to evaluate against current main. Neither is merged evidence.
 
 Every applicable gate must pass on one pinned candidate, with independent review where specified and an authorized release decision. A03–A05 have later acceptance in the asset register and roadmap and are outside this v1 target.
+
+## Independent consumer acceptance (carried forward from PR #40)
+
+Install a pinned SDK artifact in an isolated non-GC consumer outside the source tree; create and retrieve synthetic evidence with provenance intact and exercise deterministic publication candidate output. No GC Portal, Portal Kit, LASSO, model credentials or runtime network dependency is allowed in this fixture. Separately verify GC Portal's stricter importer with pinned exact-byte artifacts. Preserve existing package name/private status until ownership and distribution are authorized. These are open gates, not passed checks.
