@@ -8,6 +8,8 @@ import {parseFeed} from '../ingestion/feed-parser.mjs';
 import {retrieveFeed} from '../ingestion/feed-retriever.mjs';
 import {createSecureFeedTransport} from '../ingestion/secure-http-transport.mjs';
 
+import {canonicalDoi,normalizeScholarly,fromOpenAlex,mergeScholarly} from './scholarly.mjs';
+
 export const DISCOVERY_SCHEMA = 'gc.discovery/1';
 const sha = s => createHash('sha256').update(s).digest('hex');
 const iso = value => { const d = new Date(value); return Number.isNaN(d.valueOf()) ? null : d.toISOString(); };
@@ -20,7 +22,8 @@ export function normalizeDiscovery(item, providerId, discoveredAt=new Date().toI
   const canonicalUrl=new URL(sourceUrl); canonicalUrl.hash='';
   for (const key of [...canonicalUrl.searchParams.keys()]) if (/^(utm_|fbclid$|gclid$)/i.test(key)) canonicalUrl.searchParams.delete(key);
   const id='article-'+sha(canonicalUrl.href);
-  return {schema:DISCOVERY_SCHEMA,id,sourceUrl,title,source:clean(item.source || canonicalUrl.hostname,200),publishedAt:iso(item.publishedAt),discoveredAt:iso(discoveredAt),summary:clean(item.summary),topics:[...new Set((item.topics||[]).map(x=>clean(x,80)).filter(Boolean))].slice(0,20),providerId,provenance:{providerId,externalId:clean(item.externalId,300),rawRef:clean(item.rawRef,500)}};
+  const scholarly=normalizeScholarly(item.scholarly);
+  return {schema:DISCOVERY_SCHEMA,id,...(scholarly?{scholarly}:{}),sourceUrl,title,source:clean(item.source || canonicalUrl.hostname,200),publishedAt:iso(item.publishedAt),discoveredAt:iso(discoveredAt),summary:clean(item.summary),topics:[...new Set((item.topics||[]).map(x=>clean(x,80)).filter(Boolean))].slice(0,20),providerId,provenance:{providerId,externalId:clean(item.externalId,300),rawRef:clean(item.rawRef,500)}};
 }
 const defaults = [
   {id:'rss',type:'rss',name:'RSS / Atom',enabled:true,feeds:['https://www.nist.gov/news-events/news/rss.xml']},
@@ -70,7 +73,7 @@ async function rssItems(provider) {
 }
 async function openAlexItems(provider) {
   const data=await jsonRequest('https://api.openalex.org/works?search='+encodeURIComponent(provider.query||'governance')+'&per-page=20');
-  return (data.results||[]).map(x=>({...x,sourceUrl:[x.primary_location?.landing_page_url,x.doi,x.id].find(u=>u?.startsWith('https://'))})).filter(x=>x.sourceUrl).map(x=>({sourceUrl:x.sourceUrl,title:x.title,source:x.primary_location?.source?.display_name||'OpenAlex',publishedAt:x.publication_date,summary:'Research work indexed by OpenAlex.',topics:(x.topics||[]).slice(0,5).map(t=>t.display_name),externalId:x.id,rawRef:x.id}));
+  return (data.results||[]).map(x=>({...x,sourceUrl:[x.primary_location?.landing_page_url,x.doi,x.id].find(u=>u?.startsWith('https://'))})).filter(x=>x.sourceUrl).map(x=>({sourceUrl:x.sourceUrl,title:x.title,source:x.primary_location?.source?.display_name||'OpenAlex',publishedAt:x.publication_date,summary:'Research work indexed by OpenAlex.',topics:(x.topics||[]).slice(0,5).map(t=>t.display_name),externalId:x.id,rawRef:x.id,scholarly:fromOpenAlex(x)}));
 }
 async function braveItems(provider, key) {
   if(!key) throw Error('BRAVE_SEARCH_API_KEY is not configured');
@@ -95,9 +98,23 @@ export class NewsroomDiscovery {
   async ingest(providerId,items,at=new Date().toISOString()){
     if(!this.state.providers.some(p=>p.id===providerId))throw TypeError('Unknown provider');
     const records=items.map(x=>normalizeDiscovery(x,providerId,at));
-    return this.mutate(s=>{let added=0;for(const r of records){const eventKey=sha(providerId+'\n'+r.id+'\n'+r.provenance.externalId+'\n'+r.provenance.rawRef);if(s.events.some(e=>e.key===eventKey))continue;
-      s.events.push({key:eventKey,articleId:r.id,providerId,discoveredAt:at,provenance:r.provenance});
-      const existing=s.articles.find(a=>a.id===r.id);if(existing){existing.summary ||= r.summary;existing.topics=[...new Set([...existing.topics,...r.topics])];}else{s.articles.push(r);added++;}}
+    return this.mutate(s=>{let added=0;for(const r of records){
+      // Preserve historical URL-derived IDs and triage. DOI/OpenAlex matching is
+      // supplemental; conflicting explicit identifiers are never merged by alias.
+      const doi=r.scholarly?.doi, work=r.scholarly?.openAlexId;
+      const compatible=a=>!(doi&&a.scholarly?.doi&&doi!==a.scholarly.doi)&&!(work&&a.scholarly?.openAlexId&&work!==a.scholarly.openAlexId);
+      const exact=s.articles.find(a=>a.id===r.id);
+      const aliases=s.articles.filter(a=>compatible(a)&&((doi&&(a.scholarly?.doi===doi||canonicalDoi(a.sourceUrl)===doi))||(work&&(a.scholarly?.openAlexId===work||a.provenance?.externalId===work||s.events.some(e=>e.articleId===a.id&&e.provenance?.externalId===work)))));
+      const existing=exact||(aliases.length===1?aliases[0]:undefined);
+      const articleId=existing?.id??r.id;
+      const eventKey=sha(providerId+'\n'+articleId+'\n'+r.provenance.externalId+'\n'+r.provenance.rawRef);
+      const event=s.events.find(e=>e.key===eventKey);
+      if(!event)s.events.push({key:eventKey,articleId,providerId,discoveredAt:at,provenance:r.provenance,...(r.scholarly?{scholarly:r.scholarly}:{} )});
+      else if(r.scholarly)event.scholarly=mergeScholarly(event.scholarly,r.scholarly);
+      if(existing){
+        existing.summary ||= r.summary;existing.topics=[...new Set([...existing.topics,...r.topics])];
+        if(r.scholarly&&compatible(existing))existing.scholarly=mergeScholarly(existing.scholarly,r.scholarly);
+      }else{s.articles.push(r);added++;}}
       return {added,events:records.length};});
   }
   async triage(id,decision){if(!['accept','defer','dismiss'].includes(decision))throw TypeError('Invalid decision');if(!this.state.articles.some(a=>a.id===id))throw TypeError('Unknown article');return this.mutate(s=>{s.triage[id]={decision,at:new Date().toISOString()};return s.triage[id];});}
